@@ -1,0 +1,141 @@
+﻿88
+<html>
+<head>
+</head>
+<body style='font-family:Calibri;font-size:16px;'>
+    <div style='border: 3px solid #009094;width:900px;padding:0px 5px 0px 5px;'>
+        <center>
+            <p style='margin-bottom:2.0pt;text-align:center;line-height:normal;'>
+                <span>
+                    <img src='https://snapshots.medicount.com/Images/Logo.jpg' style='width:300px;' />
+                </span>
+            </p>
+            <p style='text-align:center;'><span style='color:#00B050;font-size:24px;'><b>LOW RUN NOTIFICATION ALERT FOR:</b></span></p>
+
+            <div style='width:100%;padding-bottom:20px !important'>
+                <div style='width:80%;float:left;text-align:left;font-weight:bold;color:#009094;font-size:20px;'>
+                    CITY OF GARY INDIANA - 368
+                </div>
+                <div style='width: 10%; float: right;'>&nbsp;</div>
+                <div style='width: 10%; float: right; text-align: left; font-weight: bold;color:#009094;font-size:20px;'>
+                    07/28/2025
+                </div>
+            </div>
+            <p style='margin-bottom:2.0pt;text-align:justify;line-height:normal'>
+                <span style='color: #009094; font-size: 24px; font-weight: bold; border: 1px solid #009094;'>LOW-RUN ALERT</span>
+                <span>This alert is designed to inform you that the number of runs received is below the expected volume, based on your 12-month historical average.</span>
+            </p>
+            <p style='margin-bottom:2.0pt;text-align:justify;line-height:normal'>
+                <span>
+                    There are several possible reasons for this discrepancy, including:
+                </span>
+            </p>
+            <p style='margin-left:31.5pt;text-indent:-13.5pt;line-height:normal;text-align:left;'>
+                <span>•&nbsp;&nbsp;&nbsp;&nbsp;	A natural decrease in call volume for the period,</span>
+            </p>
+            <p style='margin-left:31.5pt;text-indent:-13.5pt;line-height:normal;text-align:left;'>
+                <span>•&nbsp;&nbsp;&nbsp;&nbsp;	Delays in run submission due to staff absences or vacations,</span>
+            </p>
+            <p style='margin-left:31.5pt;text-indent:-13.5pt;line-height:normal;text-align:left;'>
+                <span>•&nbsp;&nbsp;&nbsp;&nbsp;	Technical issues, such as ePCR or STP transfer glitches, may have prevented data from reaching Medicount.</span>
+            </p>
+            <p style='margin-bottom:2.0pt; text-align: justify; line-height: normal'>
+                <span>
+                    Regardless of the cause, our analysis and the data reflected in your customer portal dashboard indicate that run volume is currently lower than usual.
+                </span>
+            </p>
+            <p style='margin-bottom:2.0pt; text-align: justify'>
+                <b>
+                    <span style='color:#00B050;font-size:18px;'>
+                        Please review your run summary report below:
+                    </span>
+                </b>
+            </p>
+            <p style='margin-bottom:2.0pt; text-align: left'>
+                <table>
+                    <tr>
+                        <td style='vertical-align:top;height:100%;'>
+                            <img src='https://snapshots.medicount.com/Images/LowRunSummary.png' />
+                        </td>
+                        <td style='vertical-align:top;height:100%;'>
+                            <table border=1 style='border: 1px solid black; border-collapse: collapse; text-align: center;width:100%;'>
+                                <tr>
+                                    <td style='background-color: #009094;color:white;font-weight:bold;'>COMPANY NAME</td>
+                                    <td style='background-color: #009094;color:white;font-weight:bold;'>03/01/2024 - 04/30/2025</td>
+                                    <td style='background-color: #009094;color:white;font-weight:bold;'>05/01/2025 - 05/15/2025</td>
+                                    <td style='background-color: #009094;color:white;font-weight:bold;'>RUN DIFFERENCE</td>
+                                </tr>
+                                <tr>
+                                    <td>CINCINNATI MEDICAL TRANSPORT - 330</td>
+                                    <td>1425</td>
+                                    <td>636</td>
+                                    <!--if (Convert.ToDecimal(dtSummary.Rows[i]["Run_Diff"].ToString().Trim()) >= 0)
+                                    {
+                                    <td style='background-color:green'>" + dtSummary.Rows[i]["Run_Diff"].ToString() + "</td>
+                                    }
+                                    else if (Convert.ToDecimal(dtSummary.Rows[i]["Run_Diff"].ToString().Trim()) < 0 && Convert.ToDecimal(dtSummary.Rows[i]["Run_Diff"].ToString().Trim()) >= -10)
+                                    {
+                                    <td style='background-color:yellow'>" + dtSummary.Rows[i]["Run_Diff"].ToString() + "</td>
+                                    }
+                                    else if (Convert.ToDecimal(dtSummary.Rows[i]["Run_Diff"].ToString().Trim()) < -10)
+                                    {-->
+                                    <td style='background-color:red;color:white;'>-55</td>
+                                    <!--}-->
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+                </table>
+
+            </p>
+            <p style='margin-bottom:2.0pt;text-align:justify;line-height:normal'>
+                <div style='text-align:left;'>
+                    <div style='vertical-align:top;float:left;padding-top:5px;'>
+                        If there is a <b>KNOWN</b> issue, please click on Reply and describe the issue to us:
+                    </div>
+                    <div>
+                        <a href='" + url + "frmLowRunSummary.aspx?ID=" + objCommon.Encrypt(dtSummary.Rows[i]["ID"].ToString()) + "'><img src='https://snapshots.medicount.com/Images/Reply_1.png' style='width:60px;height:30px;' /></a>
+                    </div>
+                </div>
+            </p>
+            <p style='margin-bottom:2.0pt;text-align:justify;line-height:normal'>
+                <span>
+                    Please check your customer portal dashboard to see your current running numbers:
+                </span>
+            </p>
+            <p style='margin-bottom:2.0pt;text-align:center;line-height:normal'>
+                <span>
+                    <img src='https://snapshots.medicount.com/Images/LowRunSummaryExample_1.png' style='width:900px;' />
+                </span>
+            </p>
+            <p style='margin-bottom:2.0pt;text-align:justify;line-height:normal'>
+                <span>
+                    Or run a Charge Report by Date of Entry to see exactly the runs Medicount has received.
+                </span>
+            </p>
+            <p style='margin-bottom:2.0pt;text-align:center;line-height:normal'>
+                <span>
+                    <img src='https://snapshots.medicount.com/Images/LowRunSummaryExample_2.png' style='width:900px;' />
+                </span>
+            </p>
+            <p style='margin-bottom:2.0pt;text-align:justify;line-height:normal'>
+                <div style='text-align:left;'>
+                    <div style='vertical-align:top;float:left;padding-top:5px;'>
+                        If you have any questions or concerns, contact your account executive <b>" + dtSummary.Rows[i]["AcctExec"].ToString() + "</b> by clicking on the Contact Me button.
+                    </div>
+                    <div>
+                        <a href='" + url + "frmLowRunSummary.aspx?ID=" + objCommon.Encrypt(dtSummary.Rows[i]["ID"].ToString()) + "'><img src='https://snapshots.medicount.com/Images/Contact_Me.png' style='width:100px;height:40px;' /></a>
+                    </div>
+                </div>
+            </p>
+            <br />
+            <p style='text-align: left;'>
+                Thanks,
+                <br />
+                Medicount
+            </p>
+        </center>
+    </div>
+</body>
+</html>
