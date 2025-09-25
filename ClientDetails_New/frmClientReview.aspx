@@ -370,24 +370,24 @@
                     <table style="width: 100%; border-spacing: 0 10px;">
                         <!-- Row 1 -->
                         <tr style="text-align:center !important;">
-                            <td style="display: inline-block; width: 33.33%; ">
+                            <td style="display: inline-block; width: 12%; ">
                                 <div class="form-group">
                                     <label class="form-label">CLIENT NUMBER#:</label>
-                                    <asp:DropDownList ID="ddlClientNumber" runat="server" CssClass="form-control search-dropdown" AppendDataBoundItems="true" AutoPostBack="true" OnSelectedIndexChanged="ddlClientNumber_SelectedIndexChanged">                                        
+                                    <asp:DropDownList ID="ddlClientNumber" runat="server" CssClass="form-control search-dropdown" AppendDataBoundItems="true" AutoPostBack="true" OnSelectedIndexChanged="ddlClientNumber_SelectedIndexChanged" onchange="showLoader();" style="text-align:center;">                                        
                                     </asp:DropDownList>                                  
                                 </div>
                             </td>
-                             <%-- <asp:TextBox ID="txtClientNumber" runat="server" CssClass="form-control" placeholder="Enter Client ID"></asp:TextBox>--%>
-                            <td style="display: inline-block; width: 33.33%; ">
+
+                            <td style="display: inline-block; width: 44%; ">
                                 <div class="form-group">
                                     <label class="form-label">CLIENT NAME:</label>
-                                    <asp:TextBox ID="txtClientName" runat="server" CssClass="form-control"></asp:TextBox>
+                                    <asp:TextBox ID="txtClientName" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                 </div>
                             </td>
-                            <td style="display: inline-block; width: 33.33%; ">
+                            <td style="display: inline-block; width: 44%; ">
                                 <div class="form-group">
                                     <label class="form-label">MEETING OR SENT DATE:</label>
-                                    <asp:TextBox ID="txtMeetingDate" runat="server" CssClass="form-control datepicker"></asp:TextBox>
+                                    <asp:TextBox ID="txtMeetingDate" runat="server" CssClass="form-control datepicker" style="text-align:center;"></asp:TextBox>
                                 </div>
                             </td>
                             
@@ -398,19 +398,19 @@
                                 <td style="display: inline-block; width: 33.33%; ">
                                 <div class="form-group">
                                     <label class="form-label">ACCOUNT EXECUTIVE:</label>
-                                    <asp:TextBox ID="txtAccountExecutive" runat="server" CssClass="form-control"></asp:TextBox>
+                                    <asp:TextBox ID="txtAccountExecutive" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                 </div>
                             </td>
                             <td style="display: inline-block; width: 33.33%; ">
                                 <div class="form-group">
                                     <label class="form-label">EMAIL:</label>
-                                    <asp:TextBox ID="txtEmail" runat="server" TextMode="Email" CssClass="form-control"></asp:TextBox>
+                                    <asp:TextBox ID="txtEmail" runat="server" TextMode="Email" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                 </div>
                             </td>
                             <td style="display: inline-block; width: 33.33%; ">
                                 <div class="form-group">
                                     <label class="form-label">PHONE #:</label>
-                                    <asp:TextBox ID="txtPhone" runat="server" TextMode="Phone" CssClass="form-control"></asp:TextBox>
+                                    <asp:TextBox ID="txtPhone" runat="server" TextMode="Phone" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                 </div>
                             </td>
                            
@@ -422,19 +422,19 @@
                                 <td style="display: inline-block; width: 33.33%; ">
                             <div class="form-group">
                                 <label class="form-label">RECIPIENT RECEIVING NAME:</label>
-                                <asp:TextBox ID="txtRecipientReceivingName" runat="server" CssClass="form-control"></asp:TextBox>
+                                <asp:TextBox ID="txtRecipientReceivingName" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                             </div>
                         </td>
                             <td style="display: inline-block; width: 33.33%; ">
                             <div class="form-group">
                                 <label class="form-label">RECIPIENT RECEIVING TITLE:</label>
-                                <asp:TextBox ID="txtRecipientReceivingTitle" runat="server" CssClass="form-control"></asp:TextBox>
+                                <asp:TextBox ID="txtRecipientReceivingTitle" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                             </div>
                         </td>
                             <td style="display: inline-block; width: 33.33%; ">
                                 <div class="form-group">
                                     <label class="form-label">RECIPIENT RECEIVING EMAIL:</label>
-                                    <asp:TextBox ID="txtRecipientReceivingEmail" runat="server" TextMode="Email" CssClass="form-control"></asp:TextBox>
+                                    <asp:TextBox ID="txtRecipientReceivingEmail" runat="server" TextMode="Email" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                 </div>
                             </td>
                             
@@ -455,7 +455,7 @@
                 <td style="display: inline-block; width: 33.33%; ">
                 <div class="form-group">
                     <label class="form-label">CLIENT REVENUE NUMBERS - START DATE:</label>
-                    <asp:TextBox ID="txtClientRevenueNumberStartDate" runat="server"   CssClass="form-control datepicker"></asp:TextBox>
+                    <asp:TextBox ID="txtClientRevenueNumberStartDate" runat="server"   CssClass="form-control datepicker" style="text-align:center;"></asp:TextBox>
                    
                 </div>
             </td>
@@ -463,7 +463,7 @@
                 <div class="form-group">
                     <label class="form-label">CLIENT REVENUE NUMBERS - END DATE:</label>
                     <asp:TextBox ID="txtClientRevenueNumberEndDate" runat="server"  CssClass="form-control datepicker" AutoPostBack="true" OnTextChanged="txtClientRevenueNumberEndDate_TextChanged" 
-                         onchange="showLoader();"></asp:TextBox>
+                         onchange="showLoader();" style="text-align:center;"></asp:TextBox>
                 </div>
             </td>
                
@@ -471,7 +471,7 @@
                 <div class="form-group">
                     <label class="form-label">REPORT TYPE</label>
         
-                    <asp:TextBox ID="txtReportType" runat="server" CssClass="form-control" Text="Date of Entry" Enabled="false"></asp:TextBox>
+                    <asp:TextBox ID="txtReportType" runat="server" CssClass="form-control" Text="Date of Entry" Enabled="false" style="text-align:center;"></asp:TextBox>
                 </div>
             </td>
             </tr>
@@ -479,61 +479,61 @@
                 <td style="display:inline-block;width: 14.28%;vertical-align: top;">
                     <div class="form-group">
                         <label class="form-label" style="padding-top:20% !important">TRANSPORTS:</label>
-                        <asp:TextBox ID="txtTransports" runat="server" CssClass="form-control"></asp:TextBox>
+                        <asp:TextBox ID="txtTransports" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                     </div>
                 </td>
                 <td hidden="hidden" style="display:inline-block;width: 14.28%;vertical-align: top;">
                     <div class="form-group">
                         <label class="form-label" style="padding-top:20% !important">YTD REVENUE:</label>
-                        <asp:TextBox ID="txtYtdRevenue" runat="server" CssClass="form-control"></asp:TextBox>
+                        <asp:TextBox ID="txtYtdRevenue" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                     </div>
                 </td>
                 <td style="display:inline-block;width: 14.28%;vertical-align: top;">
                     <div class="form-group">
                         <label style="padding-top:10% !important;" class="form-label">REVENUE PER TRANSPORT:</label>
-                        <asp:TextBox ID="txtRevenuePerTransport" runat="server" CssClass="form-control"></asp:TextBox>
+                        <asp:TextBox ID="txtRevenuePerTransport" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                     </div>
                 </td>
                 <td style="display:inline-block;width: 14.28%;vertical-align: top;">
                 <div class="form-group">
                     <label class="form-label" style="padding-top:20% !important">CHARGES:</label>
-                    <asp:TextBox ID="txtCharges" runat="server" CssClass="form-control" ></asp:TextBox>
+                    <asp:TextBox ID="txtCharges" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                 </div>
                 </td>
                 <td style="display:inline-block;width: 14.28%;vertical-align: top;">
                 <div class="form-group">
                     <label class="form-label" style="padding-top:20% !important">PAYMENTS:</label>
-                    <asp:TextBox ID="txtPayments" runat="server" CssClass="form-control"></asp:TextBox>
+                    <asp:TextBox ID="txtPayments" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                 </div>
                 </td>
                 <td style="display:inline-block;width: 14.28%;vertical-align: top;">
                 <div class="form-group">
                     <label class="form-label" style="padding-top:20% !important">ADJUSTMENTS:</label>
-                    <asp:TextBox ID="txtAdjustments" runat="server" CssClass="form-control"></asp:TextBox>
+                    <asp:TextBox ID="txtAdjustments" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                 </div>
                 </td>
                 <td style="display:inline-block;width: 14.28%;vertical-align: top;">
                     <div class="form-group">
                         <label class="form-label" style="padding-top:20% !important">WRITE-OFFS:</label>
-                        <asp:TextBox ID="txtWriteOffs" runat="server" CssClass="form-control"></asp:TextBox>
+                        <asp:TextBox ID="txtWriteOffs" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                     </div>
                 </td>
                 <td style="display:inline-block;width: 14.28%;vertical-align: top;">
                     <div class="form-group">
                         <label class="form-label" style="padding-top:20% !important;">COLLECTION RATE %:</label>
-                        <asp:TextBox ID="txtCollectionRate" runat="server" CssClass="form-control"></asp:TextBox>
+                        <asp:TextBox ID="txtCollectionRate" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                     </div>
                 </td>
                     <td style="display:inline-block;width: 50%;vertical-align: top;">
                     <div class="form-group">
                         <label class="form-label">CLIENT COMMENTS:</label>
-                        <asp:TextBox ID="txtClientComments" TextMode="MultiLine" runat="server" CssClass="form-control"></asp:TextBox>
+                        <asp:TextBox ID="txtClientComments" TextMode="MultiLine" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                     </div>
                 </td>
                 <td style="display:inline-block;width: 50%;vertical-align: top;">
                 <div class="form-group">
                     <label class="form-label">AE COMMENTS:</label>
-                    <asp:TextBox ID="txtAEComments" TextMode="MultiLine" runat="server" CssClass="form-control" ></asp:TextBox>
+                    <asp:TextBox ID="txtAEComments" TextMode="MultiLine" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                 </div>
                </td>
                     
@@ -556,44 +556,44 @@
              <td style="display:inline-block;width: 12.50%;vertical-align: top;">
                  <div class="form-group">
                      <label class="form-label" style="padding-top:10% !important;">DATE OF LAST RATE CHANGE:</label>
-                     <asp:TextBox ID="txtDateOfLastRateChange" runat="server" TextMode="Date" CssClass="form-control datepicker"></asp:TextBox>
+                     <asp:TextBox ID="txtDateOfLastRateChange" runat="server" TextMode="Date" CssClass="form-control datepicker" style="text-align:center;"></asp:TextBox>
                  </div>
              </td>
              <td style="display:inline-block;width: 12.50%;vertical-align: top;">
                  <div class="form-group">
                      <label class="form-label" style="padding-top:22% !important">BLS:</label>
-                     <asp:TextBox ID="txtBls" runat="server" CssClass="form-control"></asp:TextBox>
+                     <asp:TextBox ID="txtBls" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                  </div>
              </td>
              <td style="display:inline-block;width: 12.50%;vertical-align: top;">
                  <div class="form-group">
                      <label class="form-label" style="padding-top:22% !important">BLS NE:</label>
-                     <asp:TextBox ID="txtBlsNe" runat="server" CssClass="form-control"></asp:TextBox>
+                     <asp:TextBox ID="txtBlsNe" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                  </div>
              </td>
 
              <td style="display:inline-block;width: 12.50%;vertical-align: top;">
              <div class="form-group">
                  <label class="form-label" style="padding-top:22% !important">ALS:</label>
-                 <asp:TextBox ID="txtAls" runat="server" CssClass="form-control"></asp:TextBox>
+                 <asp:TextBox ID="txtAls" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
              </div>
              </td>
               <td style="display:inline-block;width: 12.50%;vertical-align: top;">
                   <div class="form-group">
                       <label class="form-label" style="padding-top:22% !important">ALS NE:</label>
-                      <asp:TextBox ID="txtAlsNe" runat="server" CssClass="form-control"></asp:TextBox>
+                      <asp:TextBox ID="txtAlsNe" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                   </div>
               </td>
               <td style="display:inline-block;width: 12.50%;vertical-align: top;">
                   <div class="form-group">
                       <label class="form-label" style="padding-top:22% !important">ALS2:</label>
-                      <asp:TextBox ID="txtAls2" runat="server" CssClass="form-control"></asp:TextBox>
+                      <asp:TextBox ID="txtAls2" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                   </div>
               </td>
              <td style="display:inline-block;width: 12.50%;vertical-align: top;" colspan="1">
              <div class="form-group">
                  <label class="form-label" style="padding-top:22% !important">MILEAGE:</label>
-                 <asp:TextBox ID="txtMileage" runat="server" CssClass="form-control"></asp:TextBox>
+                 <asp:TextBox ID="txtMileage" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
              </div>
          </td>
              <td style="display:inline-block;width: 12.50%;vertical-align: top; padding-top:3% !important;" colspan="1">
@@ -676,25 +676,25 @@
                             <td style="display: inline-block; width: 11%; ">
                                 <div class="form-group">
                                     <label class="form-label">CONTRACT RENEWAL DATE:</label>
-                                    <asp:TextBox ID="txtContractRenewalDate" runat="server" TextMode="Date" CssClass="form-control datepicker"></asp:TextBox>
+                                    <asp:TextBox ID="txtContractRenewalDate" runat="server" TextMode="Date" CssClass="form-control datepicker" style="text-align:center;"></asp:TextBox>
                                 </div>
                             </td>
                             <td style="display: inline-block; width: 11%; ">
                                 <div class="form-group">
                                     <label class="form-label">CURRENT FEE % RATE:</label>
-                                    <asp:TextBox ID="txtContractCurrentFeeRate" runat="server" CssClass="form-control"></asp:TextBox>
+                                    <asp:TextBox ID="txtContractCurrentFeeRate" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                 </div>
                             </td>
                             <td style="display: inline-block; width: 39%; ">
                                 <div class="form-group">
                                     <label class="form-label" style="padding-top:0% !important">CLIENT COMMENTS:</label>
-                                    <asp:TextBox ID="txtContrackStatusClientComments" TextMode="MultiLine" runat="server" CssClass="form-control"></asp:TextBox>
+                                    <asp:TextBox ID="txtContrackStatusClientComments" TextMode="MultiLine" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                 </div>
                             </td>
                             <td style="display: inline-block; width: 39%; ">
                             <div class="form-group">
                                 <label class="form-label" style="padding-top:0% !important">AE COMMENTS:</label>
-                                <asp:TextBox ID="txtContrackStatusAEComments" TextMode="MultiLine" runat="server" CssClass="form-control"></asp:TextBox>
+                                <asp:TextBox ID="txtContrackStatusAEComments" TextMode="MultiLine" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                             </div>
                         </td>
                         </tr>
@@ -716,25 +716,25 @@
                              <td>
                                  <div class="form-group" style="text-align: center;">
                                     <label class="form-label" style="display: block;">CURRENT CHIEF:</label>
-                                    <asp:TextBox ID="txtCurrentChiefName" runat="server" CssClass="form-control" style="display: inline-block; width:100%;"></asp:TextBox>
+                                    <asp:TextBox ID="txtCurrentChiefName" runat="server" CssClass="form-control" style="display: inline-block; width:100%; text-align:center;"></asp:TextBox>
                                 </div>
                                  </td>
                              <td>
                                  <div class="form-group" style="text-align: center;">
                                     <label class="form-label" style="display: block;">CURRENT FISCAL OFFICER:</label>
-                                    <asp:TextBox ID="txtCurrentFiscalOfficer" runat="server" CssClass="form-control" style="display: inline-block; width: 100%;"></asp:TextBox>
+                                    <asp:TextBox ID="txtCurrentFiscalOfficer" runat="server" CssClass="form-control" style="display: inline-block; width: 100%; text-align:center;"></asp:TextBox>
                                 </div>
                                      </td>
                                 <td>
                                    <div class="form-group" style="text-align: center;">
                                       <label class="form-label" style="display: block;">AUTHORIZED OFFICIAL-1:</label>
-                                      <asp:TextBox ID="txtCurrentAuthorizedOfficial_1" runat="server" CssClass="form-control" style="display: inline-block; width: 100%;"></asp:TextBox>
+                                      <asp:TextBox ID="txtCurrentAuthorizedOfficial_1" runat="server" CssClass="form-control" style="display: inline-block; width: 100%; text-align:center;"></asp:TextBox>
                                   </div>
                                     </td>
                                 <td>
                                  <div class="form-group" style="text-align: center;">
                                     <label class="form-label" style="display: block;">AUTHORIZED OFFICIAL-2:</label>
-                                    <asp:TextBox ID="txtCurrentAuthorizedOfficial_2" runat="server" CssClass="form-control" style="display: inline-block; width: 100%;"></asp:TextBox>
+                                    <asp:TextBox ID="txtCurrentAuthorizedOfficial_2" runat="server" CssClass="form-control" style="display: inline-block; width: 100%; text-align:center;"></asp:TextBox>
                                 </div>                                     
                              </td>
                           </tr>
@@ -771,17 +771,17 @@
                                         <div class="form-group">
                                             <label id="lblNewChiefName" class="form-label" runat="server" visible="false">NEW CHIEF NAME:</label>
                                             <label id="lblCurrentChiefName" class="form-label" runat="server" visible="false">CURRENT CHIEF NAME:</label>
-                                            <asp:TextBox ID="txtNewChiefName" runat="server" visible="false" CssClass="form-control"></asp:TextBox>
+                                            <asp:TextBox ID="txtNewChiefName" runat="server" visible="false" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                         </div>
                                         <div class="form-group">
                                             <label id="lblNewChiefEmail" class="form-label" runat="server" visible="false">NEW CHIEF EMAIL:</label>
                                             <label id="lblCurrentChiefEmail" class="form-label" runat="server" visible="false">CURRENT CHIEF EMAIL:</label>
-                                            <asp:TextBox ID="txtNewChiefEmail" runat="server" TextMode="Email" visible="false" CssClass="form-control"></asp:TextBox>
+                                            <asp:TextBox ID="txtNewChiefEmail" runat="server" TextMode="Email" visible="false" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                         </div>
                                         <div class="form-group" style="padding-top: 9% !important;">
                                             <label id="lblNewChiefPhoneNo" class="form-label" runat="server" visible="false">NEW CHIEF PHONE NO:</label>
                                             <label id="lblCurrentChiefPhoneNo" class="form-label" runat="server" visible="false">CURRENT CHIEF PHONE NO:</label>
-                                            <asp:TextBox ID="txtNewChiefPhone" runat="server" CssClass="form-control" visible="false"></asp:TextBox>
+                                            <asp:TextBox ID="txtNewChiefPhone" runat="server" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                                         </div>                                          
                                     </ContentTemplate>
                                 </asp:UpdatePanel>
@@ -812,17 +812,17 @@
                                         <div class="form-group">
                                             <label id="lblNewFiscalOfficerName" class="form-label" runat="server" visible="false">NEW FISCAL OFFICER NAME:</label>
                                             <label id="lblCurrentFiscalOfficerName" class="form-label" runat="server" visible="false">CURRENT FISCAL OFFICER NAME:</label>
-                                            <asp:TextBox ID="txtNewFiscalName" runat="server" CssClass="form-control" visible="false"></asp:TextBox>
+                                            <asp:TextBox ID="txtNewFiscalName" runat="server" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                                         </div>
                                         <div class="form-group">
                                             <label id="lblNewFiscalOfficerEmail" class="form-label" runat="server" visible="false">NEW FISCAL OFFICER EMAIL:</label>
                                             <label id="lblCurrentFiscalOfficerEmail" class="form-label" runat="server" visible="false">CURRENT FISCAL OFFICER EMAIL:</label>
-                                            <asp:TextBox ID="txtNewFiscalEmail" runat="server" TextMode="Email" CssClass="form-control" visible="false"></asp:TextBox>
+                                            <asp:TextBox ID="txtNewFiscalEmail" runat="server" TextMode="Email" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                                         </div>
                                         <div class="form-group" style="padding-top: 9% !important;">
                                             <label id="lblNewFiscalOfficerPhoneNo" class="form-label" runat="server" visible="false">NEW FISCAL OFFICER PHONE NO:</label>
                                             <label id="lblCurrentFiscalOfficerPhoneNo" class="form-label" runat="server" visible="false">CURRENT FISCAL OFFICER PHONE NO:</label>
-                                            <asp:TextBox ID="txtNewFiscalPhone" runat="server" CssClass="form-control" visible="false"></asp:TextBox>
+                                            <asp:TextBox ID="txtNewFiscalPhone" runat="server" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                                         </div>
                                     </ContentTemplate>
                                 </asp:UpdatePanel>
@@ -853,17 +853,17 @@
                                         <div class="form-group">
                                             <label id="lblNewAuthosizedOfficalName" class="form-label" runat="server" visible="false">NEW AUTHORIZED OFFICIAL NAME-1:</label>
                                             <label id="lblCurrentAuthosizedOfficalName" class="form-label" runat="server" visible="false">CURRENT AUTHORIZED OFFICIAL NAME-1:</label>
-                                            <asp:TextBox ID="txtNewAuthorizedName_1" runat="server" CssClass="form-control" visible="false"></asp:TextBox>
+                                            <asp:TextBox ID="txtNewAuthorizedName_1" runat="server" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                                         </div>
                                         <div class="form-group">
                                             <label id="lblNewAuthosizedOfficalEmail" class="form-label" runat="server" visible="false">NEW AUTHORIZED OFFICIAL EMAIL-1:</label>
                                             <label id="lblCurrentAuthosizedOfficalEmail" class="form-label" runat="server" visible="false">CURRENT AUTHORIZED OFFICIAL EMAIL-1:</label>
-                                            <asp:TextBox ID="txtNewAuthorizedEmail_1" runat="server" TextMode="Email" CssClass="form-control" visible="false"></asp:TextBox>
+                                            <asp:TextBox ID="txtNewAuthorizedEmail_1" runat="server" TextMode="Email" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                                         </div>
                                         <div class="form-group">
                                             <label id="lblNewAuthosizedOfficalPhoneNo" class="form-label" runat="server" visible="false">NEW AUTHORIZED OFFICIAL PHONE NO-1:</label>
                                             <label id="lblCurrentAuthosizedOfficalPhoneNo" class="form-label" runat="server" visible="false">CURRENT AUTHORIZED OFFICIAL PHONE NO-1:</label>
-                                            <asp:TextBox ID="txtNewAuthorizedPhone_1" runat="server" CssClass="form-control" visible="false"></asp:TextBox>
+                                            <asp:TextBox ID="txtNewAuthorizedPhone_1" runat="server" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                                         </div>
                                     </ContentTemplate>
                                 </asp:UpdatePanel>
@@ -892,17 +892,17 @@
                                             <div class="form-group">
                                                 <label id="lblNewAuthosizedOfficalName_2" class="form-label" runat="server" visible="false">NEW AUTHORIZED OFFICIAL NAME-2:</label>
                                                 <label id="lblCurrentAuthosizedOfficalName_2" class="form-label" runat="server" visible="false">CURRENT AUTHORIZED OFFICIAL NAME-2:</label>
-                                                <asp:TextBox ID="txtNewAuthorizedName_2" runat="server" CssClass="form-control" visible="false"></asp:TextBox>
+                                                <asp:TextBox ID="txtNewAuthorizedName_2" runat="server" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                                             </div>
                                             <div class="form-group">
                                                 <label id="lblNewAuthosizedOfficalEmail_2" class="form-label" runat="server" visible="false">NEW AUTHORIZED OFFICIAL EMAIL-2:</label>
                                                 <label id="lblCurrentAuthosizedOfficalEmail_2" class="form-label" runat="server" visible="false">CURRENT AUTHORIZED OFFICIAL EMAIL-2:</label>
-                                                <asp:TextBox ID="txtNewAuthorizedEmail_2" runat="server" TextMode="Email" CssClass="form-control" visible="false"></asp:TextBox>
+                                                <asp:TextBox ID="txtNewAuthorizedEmail_2" runat="server" TextMode="Email" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                                             </div>
                                             <div class="form-group">
                                                 <label id="lblNewAuthosizedOfficalPhoneNo_2" class="form-label" runat="server" visible="false">NEW AUTHORIZED OFFICIAL PHONE NO-2:</label>
                                                 <label id="lblCurrentAuthosizedOfficalPhoneNo_2" class="form-label" runat="server" visible="false">CURRENT AUTHORIZED OFFICIAL PHONE NO-2:</label>
-                                                <asp:TextBox ID="txtNewAuthorizedPhone_2" runat="server" CssClass="form-control" visible="false"></asp:TextBox>
+                                                <asp:TextBox ID="txtNewAuthorizedPhone_2" runat="server" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                                             </div>
                                         </ContentTemplate>
                                     </asp:UpdatePanel>
@@ -928,25 +928,25 @@
                    <td style="width: 25%;  vertical-align: top;">
                        <div class="form-group">
                            <label class="form-label">BILLING STREET ADDRESS:</label>
-                           <asp:TextBox ID="txtBillingStreet" runat="server" CssClass="form-control"></asp:TextBox>
+                           <asp:TextBox ID="txtBillingStreet" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                        </div>
                    </td>
                    <td style="width: 25%;  vertical-align: top;">
                        <div class="form-group">
                            <label class="form-label">BILLING CITY ADDRESS:</label>
-                           <asp:TextBox ID="txtBillingCity" runat="server" CssClass="form-control"></asp:TextBox>
+                           <asp:TextBox ID="txtBillingCity" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                        </div>
                    </td>
                    <td style="width: 25%;  vertical-align: top;">
                        <div class="form-group">
                            <label class="form-label">BILLING STATE ADDRESS:</label>
-                           <asp:TextBox ID="txtBillingState" runat="server" CssClass="form-control"></asp:TextBox>
+                           <asp:TextBox ID="txtBillingState" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                        </div>
                    </td>
                    <td style="width: 25%;  vertical-align: top;">
                        <div class="form-group">
                            <label class="form-label">BILLING ZIP CODE:</label>
-                           <asp:TextBox ID="txtBillingZip" runat="server" CssClass="form-control"></asp:TextBox>
+                           <asp:TextBox ID="txtBillingZip" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                        </div>
                    </td>
                </tr>
@@ -974,25 +974,25 @@
                                     <td style="width: 25%;  vertical-align: top;">
                                         <div class="form-group">
                                             <label id="lblNewBillingStreetAdd" runat="server" visible="false" class="form-label">NEW BILLING STREET ADDRESS:</label>
-                                            <asp:TextBox ID="txtNewBillingStreetAdd" runat="server" visible="false" CssClass="form-control"></asp:TextBox>
+                                            <asp:TextBox ID="txtNewBillingStreetAdd" runat="server" visible="false" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                         </div>
                                     </td>
                                     <td style="width: 25%;  vertical-align: top;">
                                         <div class="form-group">
                                             <label id="lblNewBillingCityAdd" class="form-label" visible="false" runat="server">NEW BILLING CITY ADDRESS:</label>
-                                            <asp:TextBox ID="txtNewBillingCityAdd" runat="server" visible="false" CssClass="form-control"></asp:TextBox>
+                                            <asp:TextBox ID="txtNewBillingCityAdd" runat="server" visible="false" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                         </div>
                                     </td>
                                     <td style="width: 25%;  vertical-align: top;">
                                         <div class="form-group">
                                             <label id="lblNewBillingStateAdd" class="form-label" visible="false" runat="server">NEW BILLING STATE ADDRESS:</label>
-                                            <asp:TextBox ID="txtNewBillingStateAdd" runat="server" visible="false" CssClass="form-control"></asp:TextBox>
+                                            <asp:TextBox ID="txtNewBillingStateAdd" runat="server" visible="false" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                         </div>
                                     </td>
                                     <td style="width: 25%;  vertical-align: top;">
                                         <div class="form-group">
                                             <label id="lblNewBillingZipCode" class="form-label" visible="false" runat="server">NEW BILLING ZIP CODE:</label>
-                                            <asp:TextBox ID="txtNewBillingZipCode" runat="server" visible="false" CssClass="form-control"></asp:TextBox>
+                                            <asp:TextBox ID="txtNewBillingZipCode" runat="server" visible="false" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                         </div>
                                     </td>
                                 </tr>
@@ -1001,25 +1001,25 @@
                                <td style="width: 25%;  vertical-align: top;">
                                    <div class="form-group">
                                        <label id="lblPhysicalStreet" runat="server" class="form-label">PHYSICAL LOCATION STREET ADD:</label>
-                                       <asp:TextBox ID="txtPhysicalStreet" runat="server" CssClass="form-control"></asp:TextBox>
+                                       <asp:TextBox ID="txtPhysicalStreet" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                    </div>
                                </td>
                                <td style="width: 25%;  vertical-align: top;">
                                    <div class="form-group">
                                        <label id="lblPhysicalCity" runat="server" class="form-label">PHYSICAL LOCATION CITY ADD:</label>
-                                       <asp:TextBox ID="txtPhysicalCity" runat="server" CssClass="form-control"></asp:TextBox>
+                                       <asp:TextBox ID="txtPhysicalCity" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                    </div>
                                </td>
                                <td style="width: 25%;  vertical-align: top;">
                                    <div class="form-group">
                                        <label id="lblPhysicalState"  runat="server" class="form-label">PHYSICAL LOCATION STATE ADD:</label>
-                                       <asp:TextBox ID="txtPhysicalState" runat="server" CssClass="form-control"></asp:TextBox>
+                                       <asp:TextBox ID="txtPhysicalState" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                    </div>
                                </td>
                                <td style="width: 25%;  vertical-align: top;">
                                    <div class="form-group">
                                        <label id="lblPhysicalZipCode" runat="server" class="form-label">PHYSICAL LOCATION ZIP CODE:</label>
-                                       <asp:TextBox ID="txtPhysicalZip" runat="server" CssClass="form-control"></asp:TextBox>
+                                       <asp:TextBox ID="txtPhysicalZip" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                    </div>
                                </td>
                            </tr>
@@ -1052,25 +1052,25 @@
                        <td style="width: 25%;  vertical-align: top;">
                            <div class="form-group">
                                <label id="lblNewPhysicalLocationStreetAdd" runat="server" visible="false" class="form-label">NEW PHYSICAL LOCATION STREET ADD:</label>
-                               <asp:TextBox ID="txtNewPhysicalLocationStreetAdd" runat="server" visible="false" CssClass="form-control"></asp:TextBox>
+                               <asp:TextBox ID="txtNewPhysicalLocationStreetAdd" runat="server" visible="false" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                            </div>
                        </td>
                        <td style="width: 25%;  vertical-align: top;">
                            <div class="form-group">
                                <label id="lblNewPhysicalLocationCityAdd" class="form-label" visible="false" runat="server">NEW PHYSICAL LOCATION CITY ADD:</label>
-                               <asp:TextBox ID="txtNewPhysicalLocationCityAdd" runat="server" visible="false" CssClass="form-control"></asp:TextBox>
+                               <asp:TextBox ID="txtNewPhysicalLocationCityAdd" runat="server" visible="false" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                            </div>
                        </td>
                        <td style="width: 25%;  vertical-align: top;">
                            <div class="form-group">
                                <label id="lblNewPhysicalLocationStateAdd" class="form-label" visible="false" runat="server">NEW PHYSICAL LOCATION STATE ADD:</label>
-                               <asp:TextBox ID="txtNewPhysicalLocationStateAdd" runat="server" visible="false" CssClass="form-control"></asp:TextBox>
+                               <asp:TextBox ID="txtNewPhysicalLocationStateAdd" runat="server" visible="false" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                            </div>
                        </td>
                        <td style="width: 25%;  vertical-align: top;">
                            <div class="form-group">
                                <label id="lblNewPhysicalLocationZipCode" class="form-label" visible="false" runat="server">NEW PHYSICAL LOCATION ZIP CODE:</label>
-                               <asp:TextBox ID="txtNewPhysicalLocationZipCode" runat="server" visible="false" CssClass="form-control"></asp:TextBox>
+                               <asp:TextBox ID="txtNewPhysicalLocationZipCode" runat="server" visible="false" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                            </div>
                        </td>
                    </tr>
@@ -1080,25 +1080,25 @@
                                <td style="width: 25%;  vertical-align: top;">
                                    <div class="form-group">
                                        <label class="form-label">MAILING STREET ADDRESS:</label>
-                                       <asp:TextBox ID="txtMailStreet" runat="server" CssClass="form-control"></asp:TextBox>
+                                       <asp:TextBox ID="txtMailStreet" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                    </div>
                                </td>
                                <td style="width: 25%;  vertical-align: top;">
                                    <div class="form-group">
                                        <label class="form-label">MAILING CITY ADDRESS:</label>
-                                       <asp:TextBox ID="txtMailCity" runat="server" CssClass="form-control"></asp:TextBox>
+                                       <asp:TextBox ID="txtMailCity" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                    </div>
                                </td>
                                <td style="width: 25%;  vertical-align: top;">
                                    <div class="form-group">
                                        <label class="form-label">MAILING STATE ADDRESS:</label>
-                                       <asp:TextBox ID="txtMailState" runat="server" CssClass="form-control"></asp:TextBox>
+                                       <asp:TextBox ID="txtMailState" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                    </div>
                                </td>
                                <td style="width: 25%;  vertical-align: top;">
                                    <div class="form-group">
                                        <label class="form-label">MAILING ZIP CODE:</label>
-                                       <asp:TextBox ID="txtMailZip" runat="server" CssClass="form-control"></asp:TextBox>
+                                       <asp:TextBox ID="txtMailZip" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                    </div>
                                </td>
                            </tr>
@@ -1127,25 +1127,25 @@
                                      <td style="width: 25%;  vertical-align: top;">
                                          <div class="form-group">
                                              <label id="lblNewMailingStreetAdd" class="form-label" runat="server" visible="false">NEW MAILING STREET ADDRESS:</label>
-                                             <asp:TextBox ID="txtNewMailingStreetAdd" runat="server" CssClass="form-control" visible="false"></asp:TextBox>
+                                             <asp:TextBox ID="txtNewMailingStreetAdd" runat="server" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                                          </div>
                                      </td>
                                      <td style="width: 25%;  vertical-align: top;">
                                          <div class="form-group">
                                              <label id="lblNewMailingCityAdd" class="form-label" runat="server" visible="false">NEW MAILING CITY ADDRESS:</label>
-                                             <asp:TextBox ID="txtNewMailingCityAdd" runat="server" CssClass="form-control" visible="false"></asp:TextBox>
+                                             <asp:TextBox ID="txtNewMailingCityAdd" runat="server" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                                          </div>
                                      </td>
                                      <td style="width: 25%;  vertical-align: top;">
                                          <div class="form-group">
                                              <label id="lblNewMailingStateAdd" class="form-label" runat="server" visible="false">NEW MAILING STATE ADDRESS:</label>
-                                             <asp:TextBox ID="txtNewMailingStateAdd" runat="server" CssClass="form-control" visible="false"></asp:TextBox>
+                                             <asp:TextBox ID="txtNewMailingStateAdd" runat="server" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                                          </div>
                                      </td>
                                      <td style="width: 25%;  vertical-align: top;">
                                          <div class="form-group">
                                              <label id="lblNewMailingZipCode" class="form-label" runat="server" visible="false">NEW MAILING ZIP CODE:</label>
-                                             <asp:TextBox ID="txtNewMailingZipCode" runat="server" CssClass="form-control" visible="false"></asp:TextBox>
+                                             <asp:TextBox ID="txtNewMailingZipCode" runat="server" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                                          </div>
                                      </td>
                                  </tr>
@@ -1155,25 +1155,25 @@
                                <td style="width: 25%;  vertical-align: top;">
                                    <div class="form-group">
                                        <label class="form-label">INSURANCE PAY TO STREET ADD:</label>
-                                       <asp:TextBox ID="txtInsuranceStreet" runat="server" CssClass="form-control"></asp:TextBox>
+                                       <asp:TextBox ID="txtInsuranceStreet" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                    </div>
                                </td>
                                <td style="width: 25%;  vertical-align: top;">
                                    <div class="form-group">
                                        <label class="form-label">INSURANCE PAY TO CITY ADD:</label>
-                                       <asp:TextBox ID="txtInsuranceCity" runat="server" CssClass="form-control"></asp:TextBox>
+                                       <asp:TextBox ID="txtInsuranceCity" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                    </div>
                                </td>
                                <td style="width: 25%;  vertical-align: top;">
                                    <div class="form-group">
                                        <label class="form-label">INSURANCE PAY TO STATE ADD:</label>
-                                       <asp:TextBox ID="txtInsuranceState" runat="server" CssClass="form-control"></asp:TextBox>
+                                       <asp:TextBox ID="txtInsuranceState" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                    </div>
                                </td>
                                <td style="width: 25%;  vertical-align: top;">
                                    <div class="form-group">
                                        <label class="form-label">INSURANCE PAY TO ZIP CODE:</label>
-                                       <asp:TextBox ID="txtInsuranceZip" runat="server" CssClass="form-control"></asp:TextBox>
+                                       <asp:TextBox ID="txtInsuranceZip" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                    </div>
                                </td>
                            </tr>
@@ -1200,25 +1200,25 @@
                         <td style="width: 25%;  vertical-align: top;">
                             <div class="form-group">
                                 <label id="lblNewInsurancePayToStreetAdd" class="form-label" runat="server" visible="false">NEW INSURANCE PAY TO STREET ADD:</label>
-                                <asp:TextBox ID="txtNewInsurancePayToStreetAdd" runat="server" CssClass="form-control" visible="false"></asp:TextBox>
+                                <asp:TextBox ID="txtNewInsurancePayToStreetAdd" runat="server" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                             </div>
                         </td>
                         <td style="width: 25%;  vertical-align: top;">
                             <div class="form-group">
                                 <label id="lblInsurancePayToCityAdd" class="form-label" runat="server" visible="false">NEW INSURANCE PAY TO CITY ADD:</label>
-                                <asp:TextBox ID="txtInsurancePayToCityAdd" runat="server" CssClass="form-control" visible="false"></asp:TextBox>
+                                <asp:TextBox ID="txtInsurancePayToCityAdd" runat="server" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                             </div>
                         </td>
                         <td style="width: 25%;  vertical-align: top;">
                             <div class="form-group">
                                 <label id="lblInsurancePayToStateAdd" class="form-label" runat="server" visible="false">NEW INSURANCE PAY TO STATE ADD:</label>
-                                <asp:TextBox ID="txtInsurancePayToStateAdd" runat="server" CssClass="form-control" visible="false"></asp:TextBox>
+                                <asp:TextBox ID="txtInsurancePayToStateAdd" runat="server" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                             </div>
                         </td>
                         <td style="width: 25%;  vertical-align: top;">
                             <div class="form-group">
                                 <label id="lblNewInsuranceToPayZipCode" class="form-label" runat="server" visible="false">NEW INSURANCE PAY TO ZIP CODE:</label>
-                                <asp:TextBox ID="txtNewInsuranceToPayZipCode" runat="server" CssClass="form-control" visible="false"></asp:TextBox>
+                                <asp:TextBox ID="txtNewInsuranceToPayZipCode" runat="server" CssClass="form-control" visible="false" style="text-align:center;"></asp:TextBox>
                             </div>
                         </td>
                     </tr>
@@ -1287,13 +1287,13 @@
                                 <td style="display: inline-block; width: 50%; ">
                                     <div class="form-group">
                                         <label class="form-label" style="padding-top:0% !important">CLIENT COMMENTS:</label>
-                                        <asp:TextBox ID="txtDemographicChangesAEComments" TextMode="MultiLine" runat="server" CssClass="form-control"></asp:TextBox>
+                                        <asp:TextBox ID="txtDemographicChangesAEComments" TextMode="MultiLine" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                     </div>
                                 </td>
                                 <td style="display: inline-block; width: 50%; ">
                                 <div class="form-group">
                                     <label class="form-label" style="padding-top:0% !important">AE COMMENTS:</label>
-                                    <asp:TextBox ID="txtDemographicChangesClientComments" TextMode="MultiLine" runat="server" CssClass="form-control"></asp:TextBox>
+                                    <asp:TextBox ID="txtDemographicChangesClientComments" TextMode="MultiLine" runat="server" CssClass="form-control" style="text-align:center;"></asp:TextBox>
                                 </div>
                                 </td>                               
                             </tr>
@@ -1448,7 +1448,7 @@
                         </div>
 
                         <div style="display: inline-block; vertical-align: middle; margin: 0 10px;">
-                            <asp:TextBox ID="txtRunsReviewed" runat="server" style="width: 100px; border: none; border-bottom: 1px solid black;"></asp:TextBox>
+                            <asp:TextBox ID="txtRunsReviewed" runat="server" style="width: 100px; border: none; border-bottom: 1px solid black; text-align:center;"></asp:TextBox>
                         </div>
 
                         <div style="display: inline-block; vertical-align: middle;">
@@ -1456,7 +1456,7 @@
                         </div>
 
                         <div style="display: inline-block; vertical-align: middle; margin: 0 10px;">
-                            <asp:TextBox ID="txtRunsNotMet" runat="server" style="width: 100px; border: none; border-bottom: 1px solid black;"></asp:TextBox>
+                            <asp:TextBox ID="txtRunsNotMet" runat="server" style="width: 100px; border: none; border-bottom: 1px solid black; text-align:center;"></asp:TextBox>
                         </div>
 
                         <div style="display: inline-block; vertical-align: middle;">
@@ -1499,7 +1499,7 @@
                             <td style="width: 46%; vertical-align: top;">
                             <div class="form-group text-center">
                                 <label class="form-label d-block mb-2">NEXT REVIEW SCHEDULE DATE:</label>
-                                <asp:TextBox ID="txtNextReviewDate" runat="server"  TextMode="Date" CssClass="form-control datepicker d-inline-block text-center" Style="width: 40%;"></asp:TextBox>
+                                <asp:TextBox ID="txtNextReviewDate" runat="server"  TextMode="Date" CssClass="form-control datepicker d-inline-block text-center" Style="width: 40%; text-align:center;"></asp:TextBox>
                             </div>
                         </td>
                         </tr>
@@ -1525,7 +1525,7 @@
                                     Click on the submit form to return to your account executive:
                                 </label>
                             </td>
-                            <td class="text-end" style="width:50%;">
+                            <td class="text-end" style="width:50%;text-align:right">
                                 <label class="form-label">
                                     Click on the PDF Download if you want to print or save this report:
                                 </label>

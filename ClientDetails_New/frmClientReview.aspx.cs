@@ -14,7 +14,9 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Security.Policy;
@@ -26,7 +28,6 @@ using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using System.Xml;
 using System.Xml.Linq;
-using System.Linq;
 
 
 
@@ -46,142 +47,7 @@ namespace ClientDetails
             }
 
         }
-        
-        //protected void btnSubmit_Click(object sender, EventArgs e)
-        //{
-        //    if (Page.IsValid)
-        //    {
-        //        try
-        //        {
-        //            // Create XML from form data
-        //            XElement clientReviewXml = new XElement("ClientReview",
-        //                // Meeting Details
-        //                new XElement("ClientNumber", txtClientNumber.Text),
-        //                new XElement("ClientName", txtClientName.Text),
-        //                new XElement("MeetingDate", string.IsNullOrEmpty(txtMeetingDate.Text) ? null : txtMeetingDate.Text),
-        //                new XElement("AccountExecutive", txtAccountExecutive.Text),
-        //                new XElement("Email", txtEmail.Text),
-        //                new XElement("Phone", txtPhone.Text),
-
-        //                // Attendees Invited
-        //                new XElement("AttendeeName", txtName.Text),
-        //                new XElement("AttendeeTitle", txtTitle.Text),
-        //                new XElement("AttendeeEmail", txtAIEmail.Text),
-        //                new XElement("RevenueStartDate", string.IsNullOrEmpty(txtRevenueStartDate.Text) ? null : txtRevenueStartDate.Text),
-        //                new XElement("RevenueEndDate", string.IsNullOrEmpty(txtRevenueEndDate.Text) ? null : txtRevenueEndDate.Text),
-
-        //                // RPT and Collection Rates
-        //                new XElement("YtdRevenue", string.IsNullOrEmpty(txtYtdRevenue.Text) ? null : txtYtdRevenue.Text),
-        //                new XElement("YtdTransports", string.IsNullOrEmpty(txtYtdTransports.Text) ? null : txtYtdTransports.Text),
-        //                new XElement("RevenuePerTransport", string.IsNullOrEmpty(txtRevenuePerTransport.Text) ? null : txtRevenuePerTransport.Text),
-        //                new XElement("Charges", string.IsNullOrEmpty(txtCharges.Text) ? null : txtCharges.Text),
-        //                new XElement("Payments", string.IsNullOrEmpty(txtPayments.Text) ? null : txtPayments.Text),
-        //                new XElement("Adjustments", string.IsNullOrEmpty(txtAdjustments.Text) ? null : txtAdjustments.Text),
-        //                new XElement("WriteOffs", string.IsNullOrEmpty(txtWriteOffs.Text) ? null : txtWriteOffs.Text),
-        //                new XElement("CollectionRate", string.IsNullOrEmpty(txtCollectionRate.Text) ? null : txtCollectionRate.Text),
-
-        //                // Billing Rate Review
-        //                new XElement("LastRateChange", txtLastRateChange.Text),
-        //                new XElement("BlsRate", string.IsNullOrEmpty(txtBls.Text) ? null : txtBls.Text),
-        //                new XElement("BlsNeRate", string.IsNullOrEmpty(txtBlsNe.Text) ? null : txtBlsNe.Text),
-        //                new XElement("AlsRate", string.IsNullOrEmpty(txtAls.Text) ? null : txtAls.Text),
-        //                new XElement("AlsNeRate", string.IsNullOrEmpty(txtAlsNe.Text) ? null : txtAlsNe.Text),
-        //                new XElement("Als2Rate", string.IsNullOrEmpty(txtAls2.Text) ? null : txtAls2.Text),
-        //                new XElement("NonTransport", rbNonTransportYes.Checked),
-        //                new XElement("MileageRate", string.IsNullOrEmpty(txtMileage.Text) ? null : txtMileage.Text),
-        //                new XElement("RateChanges", rbRateChangesYes.Checked),
-
-        //                // Contract Status
-        //                new XElement("RenewalDate", string.IsNullOrEmpty(txtRenewalDate.Text) ? null : txtRenewalDate.Text),
-        //                new XElement("CurrentRate", string.IsNullOrEmpty(txtCurrentRate.Text) ? null : txtCurrentRate.Text),
-
-        //                // Personnel Changes
-        //                new XElement("Chief", txtChief.Text),
-        //                new XElement("ChiefCorrect", rbChiefCorrectYes.Checked),
-        //                new XElement("ChiefIfNot", txtChiefIfNot.Text),
-        //                new XElement("FiscalOfficer", txtFiscalOfficer.Text),
-        //                new XElement("FiscalCorrect", rbFiscalCorrectYes.Checked),
-        //                new XElement("FiscalIfNot", txtFiscalIfNot.Text),
-        //                new XElement("AuthorizedOfficial", txtAuthorizedOfficial.Text),
-        //                new XElement("OfficialCorrect", rbOfficialCorrectYes.Checked),
-        //                new XElement("OfficialIfNot", txtOfficialIfNot.Text),
-
-        //                // Demographic Changes
-        //                new XElement("MajorBusinessClosed", rbBusinessClosedYes.Checked),
-        //                new XElement("NursingHomeChanges", rbNursingHomeYes.Checked),
-
-        //                // New Business
-        //                new XElement("UseClientPortal", rbPortalYes.Checked),
-        //                new XElement("ReceivingAlerts", rbAlertYes.Checked),
-        //                new XElement("AdditionalTraining", rbTrainingYes.Checked),
-        //                new XElement("RunsReviewed", string.IsNullOrEmpty(txtRunsReviewed.Text) ? null : txtRunsReviewed.Text),
-        //                new XElement("RunsNotMet", string.IsNullOrEmpty(txtRunsNotMet.Text) ? null : txtRunsNotMet.Text),
-
-        //                // Client Review Intervals
-        //                new XElement("ReviewInterval", rbIntervalSemiAnnual.Checked ? "Semi-Annual" : "Yearly"),
-        //                new XElement("NextReviewDate", string.IsNullOrEmpty(txtNextReviewDate.Text) ? null : txtNextReviewDate.Text),
-
-        //                // ePCR
-        //                new XElement("EpcrName", txtEpcrName.Text),
-
-        //                // Reconciliation
-        //                new XElement("ReconciliationStatus", rbReconciliationYes.Checked),
-        //                new XElement("ReconciliationDate", rbReconciliationYes.Checked && !string.IsNullOrEmpty(txtReconciliationDate.Text) ?
-        //                    txtReconciliationDate.Text : null),
-
-        //                // Address Information
-        //                new XElement("BillingStreet", txtBillingStreet.Text),
-        //                new XElement("BillingCity", txtBillingCity.Text),
-        //                new XElement("BillingState", txtBillingState.Text),
-        //                new XElement("BillingZip", txtBillingZip.Text),
-        //                new XElement("PhysicalState", txtPhysicalState.Text),
-        //                new XElement("PhysicalZip", txtPhysicalZip.Text)
-        //            );
-
-        //            string connectionString = ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString;
-
-        //            using (SqlConnection connection = new SqlConnection(connectionString))
-        //            {
-        //                using (SqlCommand command = new SqlCommand("sp_InsertClientReview", connection))
-        //                {
-        //                    command.CommandType = CommandType.StoredProcedure;
-
-        //                    // Add XML parameter
-        //                    SqlParameter xmlParam = command.Parameters.Add("@ClientReviewXML", SqlDbType.Xml);
-        //                    xmlParam.Value = clientReviewXml.ToString();
-
-        //                    // Add created by parameter
-        //                    //command.Parameters.AddWithValue("@CreatedBy", User.Identity.Name ?? "System");
-
-        //                    connection.Open();
-        //                    var newId = command.ExecuteScalar();
-
-        //                    if (newId != null)
-        //                    {
-        //                        ScriptManager.RegisterStartupScript(this, this.GetType(), "success",
-        //                            "alert('Client review submitted successfully! ID: " + newId.ToString() + "');", true);
-        //                    }
-        //                    else
-        //                    {
-        //                        ScriptManager.RegisterStartupScript(this, this.GetType(), "error",
-        //                            "alert('Error submitting the form. Please try again.');", true);
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            // Log the error
-        //            // LogError(ex);
-
-        //            // Show user-friendly error message
-        //            ScriptManager.RegisterStartupScript(this, this.GetType(), "error",
-        //                $"alert('An error occurred: {ex.Message}');", true);
-        //        }
-        //    }
-        //}
-
-
+       
         protected void btnSubmit_Click(object sender, EventArgs e)
         {
             try
@@ -399,37 +265,6 @@ namespace ClientDetails
 
             return reviewId;
         }
-
-
-        //private int SaveToDatabase(string xmlData)
-        //{
-        //    int reviewId = 0;
-        //    string connectionString = "Your_Connection_String_Here";
-
-        //    using (SqlConnection connection = new SqlConnection(connectionString))
-        //    {
-        //        using (SqlCommand command = new SqlCommand("sp_InsertClientReview", connection))
-        //        {
-        //            command.CommandType = CommandType.StoredProcedure;
-
-        //            // Add parameters
-        //            SqlParameter xmlParam = new SqlParameter("@XmlData", SqlDbType.Xml);
-        //            xmlParam.Value = xmlData;
-        //            command.Parameters.Add(xmlParam);
-
-        //            SqlParameter idParam = new SqlParameter("@ReviewID", SqlDbType.Int);
-        //            idParam.Direction = ParameterDirection.Output;
-        //            command.Parameters.Add(idParam);
-
-        //            connection.Open();
-        //            command.ExecuteNonQuery();
-
-        //            reviewId = Convert.ToInt32(idParam.Value);
-        //        }
-        //    }
-
-        //    return reviewId;
-        //}
 
 
         private string GetFullHtml()
@@ -829,229 +664,74 @@ namespace ClientDetails
                     SqlDataReader rdr = cmd.ExecuteReader();
 
                     ddlClientNumber.DataSource = rdr;
-                    ddlClientNumber.DataTextField = "CompanyName";  // what user sees
+                    ddlClientNumber.DataTextField = "CompanyCode";  // what user sees
                     ddlClientNumber.DataValueField = "CompanyCode";     // actual value
                     ddlClientNumber.DataBind();
                 }
             }
 
             // Add default option
-            ddlClientNumber.Items.Insert(0, new ListItem("-- Select Client Number --", ""));
-        }     
+            ddlClientNumber.Items.Insert(0, new ListItem("--Client Num--", ""));
+        }
 
-        //protected void ddlClientNumber_SelectedIndexChanged(object sender, EventArgs e)
-        //{
-        //    string getClientIdWithName = ddlClientNumber.SelectedValue;
-        //    using (SqlConnection connection = new SqlConnection(connectionString))
-        //    {
-        //        connection.Open();
-        //        using (SqlCommand cmd = new SqlCommand("[dbo].[sp_GetClientInfoWithClientID]", connection))
-        //        {
-        //            cmd.CommandType = CommandType.StoredProcedure;
-        //            cmd.Parameters.AddWithValue("@ClientId", getClientIdWithName);
-        //            using (SqlDataReader rdr = cmd.ExecuteReader())
-        //            {
-        //                if (rdr.Read()) // Read first row
-        //                {
-        //                    // Example: if SP returns ClientName column
-        //                    txtClientName.Text = rdr["CompanyName"].ToString();
-        //                    txtAccountExecutive.Text = rdr["AccountExecutive"].ToString();
-        //                    txtEmail.Text = rdr["AccountExecutiveEmailID"].ToString();
-        //                    txtPhone.Text = rdr["AccountExecutivePhone"].ToString();
-
-        //                }
-        //            }
-
-        //        }
-        //    }
-
-        //    FrmClientZohoApiCredentials ZohoCred = new FrmClientZohoApiCredentials();
-
-        //    ZohoCred.ClientId = ConfigurationManager.AppSettings["ZohoClientId"].ToString();
-        //    ZohoCred.ClientSecret = ConfigurationManager.AppSettings["ZohoClientSecret"].ToString();
-        //    ZohoCred.RefreshToken = ConfigurationManager.AppSettings["ZohoRefreshToken"].ToString();
-        //    string accessToken = GetAccessTokenFromRefreshToken(ZohoCred);
-        //    string url = $"https://www.zohoapis.com/crm/v8/Accounts/search?criteria=(Account_Number:equals:{getClientIdWithName})";
-        //    string zohoData = MakeZohoApiRequest("GET", url, accessToken);
-
-        //    if (!string.IsNullOrEmpty(zohoData))
-        //    {
-        //        var jsonObj = JObject.Parse(zohoData);
-        //        var dataArray = jsonObj["data"]?.ToObject<List<JObject>>();
-
-        //        if (dataArray != null && dataArray.Count > 0)
-        //        {
-        //            var contact = dataArray[0];
-
-        //            txtMailStreet.Text = contact["Mailing_Street"]?.ToString();
-        //            txtMailCity.Text = contact["Mailing_City"]?.ToString();
-        //            txtMailState.Text = contact["Mailing_State"]?.ToString();
-        //            txtMailZip.Text = contact["Mailing_Zip"]?.ToString();
-        //        }
-        //        else
-        //        {
-        //            txtMailStreet.Text = txtMailCity.Text = txtMailState.Text = txtMailZip.Text = "N/A";
-        //        }
-
-        //    }
-
-        //}
-
-        protected void txtClientRevenueNumberEndDate_TextChanged(object sender, EventArgs e)
+        public void ResetForm(System.Web.UI.Control parent)
         {
-            string companyID = ddlClientNumber.SelectedValue;
-            if (Session["StartDate"] != null)
-                txtClientRevenueNumberStartDate.Text = DateTime.ParseExact(Session["StartDate"].ToString(), "yyyy-MM-dd", null).ToString("yyyy-MM-dd");
-            string startDateFormatted = txtClientRevenueNumberStartDate.Text;
-           
-            if (Session["EndDate"] != null)
-                txtClientRevenueNumberEndDate.Text = DateTime.ParseExact(Session["EndDate"].ToString(), "yyyy-MM-dd", null).ToString("yyyy-MM-dd");
-            string endDateFormatted = txtClientRevenueNumberEndDate.Text;
-
-            
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            foreach (System.Web.UI.Control control in parent.Controls)
+            {
+                // Recursively clear nested controls
+                if (control.HasControls())
                 {
-                    connection.Open();
-                    using (SqlCommand cmd = new SqlCommand("[dbo].[sp_GetClientReviewFormDetails]", connection))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                         cmd.CommandTimeout = 360;
-                         cmd.Parameters.AddWithValue("@CompanyKey", companyID);
-                        cmd.Parameters.AddWithValue("@Period1BeginDate", startDateFormatted);
-                        cmd.Parameters.AddWithValue("@Period1EndDate", endDateFormatted);
-                        using (SqlDataReader rdr = cmd.ExecuteReader())
-                        {
-                            if (rdr.Read()) 
-                            {                            
-                                txtTransports.Text = rdr["Payments_Prev"].ToString();
-                                txtRevenuePerTransport.Text = rdr["RPT_Prev"].ToString();
-                                txtCharges.Text = rdr["Charges_Prev"].ToString();
-                                txtPayments.Text = rdr["Payments_Prev"].ToString();
-                                txtAdjustments.Text = rdr["Adjustments_Prev"].ToString();
-                                txtWriteOffs.Text = rdr["WriteOffs_Prev"].ToString();
-                                txtCollectionRate.Text = rdr["Collection_Rate_Prev"].ToString();
-                                if (rdr["StartDate"] != DBNull.Value)
-                                txtClientRevenueNumberStartDate.Text = Convert.ToDateTime(rdr["StartDate"]).ToString("MM-dd-yyyy");
-
-                                if (rdr["EndDate"] != DBNull.Value)
-                                txtClientRevenueNumberEndDate.Text = Convert.ToDateTime(rdr["EndDate"]).ToString("MM-dd-yyyy");
-
-                            }
-                        }
-
-                    }
+                    ResetForm(control); // Call recursively
                 }
-            GetChargeRate(companyID);
-            
-        }
-        protected void GetChargeRate(string Companycode)
-        {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                using (SqlCommand cmd = new SqlCommand("[dbo].[spCRF_GetDetailsForClientReviewForm]", connection))
+
+                // Reset Web Forms controls
+                if (control is TextBox)
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.CommandTimeout = 240;
-                    cmd.Parameters.AddWithValue("@CompanyCode", Companycode);
-                    
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
-                    {
-                        if (rdr.Read())
-                        {
-                            txtBls.Text = rdr["BLSE"].ToString();
-                            txtBlsNe.Text = rdr["BLSNE"].ToString();
-                            txtAls.Text = rdr["ALSE"].ToString();
-                            txtAlsNe.Text = rdr["ALSNE"].ToString();
-                            txtAls2.Text = rdr["ALS2"].ToString();
-                            txtMileage.Text = rdr["Ground_Mileage"].ToString();
-
-                            //Address information for Insurance 
-                            txtInsuranceStreet.Text = rdr["InsPayToAddress"].ToString();
-                            txtInsuranceCity.Text = rdr["InsPayToCity"].ToString();
-                            txtInsuranceState.Text = rdr["InsPayToState"].ToString();
-                            txtInsuranceZip.Text = rdr["InsPayToZip"].ToString();
-
-                            // address information for Billing  address and physical 
-
-                            txtBillingStreet.Text = rdr["PhysicalAddress"].ToString();
-                            txtBillingCity.Text = rdr["PhysicalCity"].ToString();
-                            txtBillingState.Text = rdr["PhysicalState"].ToString();
-                            txtBillingZip.Text = rdr["PhysicalZip"].ToString();
-                        }
-                    }
-
+                    ((TextBox)control).Text = string.Empty;
                 }
-            }
-        }
 
-        private string GetAccessTokenFromRefreshToken(FrmClientZohoApiCredentials zohoCred)
-        {
-            //string url = "https://accounts.zoho.com/oauth/v2/token";
-            string postData = $"refresh_token={zohoCred.RefreshToken}&client_id={zohoCred.ClientId}&client_secret={zohoCred.ClientSecret}&grant_type=refresh_token";
-
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(zohoAuthUrl);
-            byte[] data = Encoding.UTF8.GetBytes(postData);
-
-            request.Method = "POST";
-            request.ContentType = "application/x-www-form-urlencoded";
-            request.ContentLength = data.Length;
-
-            using (Stream stream = request.GetRequestStream())
-            {
-                stream.Write(data, 0, data.Length);
-            }
-
-            using (WebResponse response = request.GetResponse())
-            using (StreamReader reader = new StreamReader(response.GetResponseStream()))
-            {
-                var responseText = reader.ReadToEnd();
-                JObject tokenObj = JObject.Parse(responseText);
-                return tokenObj["access_token"].ToString();
-            }
-        }
-
-        private string MakeZohoApiRequest(string method, string url, string accessToken, string jsonPayload = null)
-        {
-            try
-            {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                request.Method = method;
-                request.Headers.Add("Authorization", $"Zoho-oauthtoken {accessToken}");
-
-                if (jsonPayload != null)
+                if (control is DropDownList)
                 {
-                    byte[] byteArray = Encoding.UTF8.GetBytes(jsonPayload);
-                    request.ContentType = "application/json";
-                    request.ContentLength = byteArray.Length;
-                    using (Stream dataStream = request.GetRequestStream())
+                    ((DropDownList)control).SelectedIndex = -1;
+                }
+
+                if (control is CheckBox)
+                {
+                    ((CheckBox)control).Checked = false;
+                }
+
+                if (control is RadioButton)
+                {
+                    ((RadioButton)control).Checked = false;
+                }
+
+                if (control is RadioButtonList)
+                {
+                    ((RadioButtonList)control).SelectedIndex = -1;
+                }
+
+                if (control is CheckBoxList)
+                {
+                    foreach (ListItem item in ((CheckBoxList)control).Items)
                     {
-                        dataStream.Write(byteArray, 0, byteArray.Length);
+                        item.Selected = false;
                     }
                 }
 
-                using (WebResponse response = request.GetResponse())
-                using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                if (control is FileUpload)
                 {
-                    return reader.ReadToEnd();
+                    ((FileUpload)control).Attributes.Clear();
                 }
-            }
-            catch (WebException ex)
-            {
-                // Handle only GET method error by returning null
-                if (method == "GET")
-                {
-                    return null;
-                }
-
-                // For PUT or other methods, optionally rethrow or log the exception
-                throw; // Or log and return error details if preferred
             }
         }
+
 
         protected void ddlClientNumber_SelectedIndexChanged(object sender, EventArgs e)
         {
             string getClientIdWithName = ddlClientNumber.SelectedValue;
+            ResetForm(this);
+            ddlClientNumber.Text = getClientIdWithName;
+            txtReportType.Text = "Date of Entry";
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
@@ -1122,7 +802,8 @@ namespace ClientDetails
                                 // CHIEF
                                 if (ChiefList.Select(chief => chief.Trim().ToUpper()).Contains(ContactData["Title"]?.ToString().Trim().ToUpper()))
                                 {
-                                    txtCurrentChiefName.Text = ContactData["Title"]?.ToString();
+                                    //txtCurrentChiefName.Text = ContactData["Title"]?.ToString();
+                                    txtCurrentChiefName.Text = $"{ContactData["First_Name"]?.ToString()} {ContactData["Last_Name"]?.ToString()}";
                                     txtNewChiefName.Text = $"{ContactData["First_Name"]?.ToString()} {ContactData["Last_Name"]?.ToString()}";
                                     txtNewChiefEmail.Text = ContactData["Email"]?.ToString();
                                     txtNewChiefPhone.Text = ContactData["Phone"]?.ToString();
@@ -1133,7 +814,8 @@ namespace ClientDetails
                                 // FISCAL OFFICER
                                 if (FiscalOfficerList.Select(fiscalOff => fiscalOff.Trim().ToUpper()).Contains(ContactData["Title"]?.ToString().Trim().ToUpper()))
                                 {
-                                    txtCurrentFiscalOfficer.Text = ContactData["Title"]?.ToString();
+                                    //txtCurrentFiscalOfficer.Text = ContactData["Title"]?.ToString();
+                                    txtCurrentFiscalOfficer.Text = $"{ContactData["First_Name"]?.ToString()} {ContactData["Last_Name"]?.ToString()}";
                                     txtNewFiscalName.Text = $"{ContactData["First_Name"]?.ToString()} {ContactData["Last_Name"]?.ToString()}";
                                     txtNewFiscalEmail.Text = ContactData["Email"]?.ToString();
                                     txtNewFiscalPhone.Text = ContactData["Phone"]?.ToString();
@@ -1143,7 +825,8 @@ namespace ClientDetails
                                 {
                                     authorizedOfficialDict[$"Authorized Official {i}"] = new List<string>
                                     {
-                                        ContactData["Title"]?.ToString(),
+                                        //ContactData["Title"]?.ToString(),
+                                        $"{ContactData["First_Name"]?.ToString()} {ContactData["Last_Name"]?.ToString()}",
                                         $"{ContactData["First_Name"]?.ToString()} {ContactData["Last_Name"]?.ToString()}",
                                         ContactData["Email"]?.ToString(),
                                         ContactData["Phone"]?.ToString(),
@@ -1192,6 +875,215 @@ namespace ClientDetails
             }
 
         }
+
+        public static string CleanedVersionOfValues(object value, bool removeDecimal = true, string type = "AMOUNT")
+        {
+            
+            if (type.ToUpper() != "AMOUNT")
+            {
+                decimal numericValue = 0;
+                if (value is float || value is decimal || value is int)
+                {
+                    numericValue = Convert.ToDecimal(value) * 100;
+                }
+
+
+                if (removeDecimal)
+                {
+                    return $"{numericValue.ToString("F0")} %";
+                }
+                else
+                {
+                    return $"{numericValue.ToString("F2")} %";
+                }
+
+
+            }
+            else
+            {
+                string strValue = value.ToString();
+                
+                if (decimal.TryParse(strValue, out decimal result))
+                    {
+                        // Format with thousand separators and 2 decimal places
+                        strValue =  result.ToString("C2", CultureInfo.CreateSpecificCulture("en-US"));
+                    }
+                
+                if (removeDecimal)
+                {
+                    if (strValue == "")
+                        return "$0";
+
+                    return strValue.Substring(0, strValue.IndexOf('.'));
+                }
+                else
+                {
+                    if (strValue == "")
+                        return "$0";
+
+                    return strValue;
+                }
+            }     
+        }
+
+
+        protected void txtClientRevenueNumberEndDate_TextChanged(object sender, EventArgs e)
+        {
+            string companyID = ddlClientNumber.SelectedValue;
+            if (Session["StartDate"] != null)
+                txtClientRevenueNumberStartDate.Text = DateTime.ParseExact(Session["StartDate"].ToString(), "yyyy-MM-dd", null).ToString("yyyy-MM-dd");
+            string startDateFormatted = txtClientRevenueNumberStartDate.Text;
+           
+            if (Session["EndDate"] != null)
+                txtClientRevenueNumberEndDate.Text = DateTime.ParseExact(Session["EndDate"].ToString(), "yyyy-MM-dd", null).ToString("yyyy-MM-dd");
+            string endDateFormatted = txtClientRevenueNumberEndDate.Text;
+
+            
+            using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand cmd = new SqlCommand("[dbo].[sp_GetClientReviewFormDetails]", connection))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                         cmd.CommandTimeout = 360;
+                         cmd.Parameters.AddWithValue("@CompanyKey", companyID);
+                        cmd.Parameters.AddWithValue("@Period1BeginDate", startDateFormatted);
+                        cmd.Parameters.AddWithValue("@Period1EndDate", endDateFormatted);
+                        using (SqlDataReader rdr = cmd.ExecuteReader())
+                        {
+                            if (rdr.Read()) 
+                            {                            
+                                txtTransports.Text = ((long)Convert.ToDouble(rdr["Runs_Prev"])).ToString("N0", new System.Globalization.CultureInfo("en-US"));
+                                txtRevenuePerTransport.Text = CleanedVersionOfValues(rdr["RPT_Prev"]);
+                                txtCharges.Text = CleanedVersionOfValues(rdr["Charges_Prev"]);
+                                txtPayments.Text = CleanedVersionOfValues(rdr["Payments_Prev"]);
+                                txtAdjustments.Text = CleanedVersionOfValues(rdr["Adjustments_Prev"]);
+                                txtWriteOffs.Text = CleanedVersionOfValues(rdr["WriteOffs_Prev"]);
+                                txtCollectionRate.Text = CleanedVersionOfValues(rdr["Collection_Rate_Prev"], removeDecimal:false, type: "PERCENTAGE");
+                                if (rdr["StartDate"] != DBNull.Value)
+                                txtClientRevenueNumberStartDate.Text = Convert.ToDateTime(rdr["StartDate"]).ToString("MM-dd-yyyy");
+
+                                if (rdr["EndDate"] != DBNull.Value)
+                                txtClientRevenueNumberEndDate.Text = Convert.ToDateTime(rdr["EndDate"]).ToString("MM-dd-yyyy");
+
+                            }
+                        }
+
+                    }
+                }
+            GetChargeRate(companyID);
+            
+        }
+        protected void GetChargeRate(string Companycode)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (SqlCommand cmd = new SqlCommand("[dbo].[spCRF_GetDetailsForClientReviewForm]", connection))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandTimeout = 240;
+                    cmd.Parameters.AddWithValue("@CompanyCode", Companycode);
+                    
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        if (rdr.Read())
+                        {
+                            txtBls.Text = CleanedVersionOfValues(rdr["BLSE"]);
+                            txtBlsNe.Text = CleanedVersionOfValues(rdr["BLSNE"]);
+                            txtAls.Text = CleanedVersionOfValues(rdr["ALSE"]);
+                            txtAlsNe.Text = CleanedVersionOfValues(rdr["ALSNE"]);
+                            txtAls2.Text = CleanedVersionOfValues(rdr["ALS2"]);
+                            txtMileage.Text = CleanedVersionOfValues(rdr["Ground_Mileage"]);
+
+                            //Address information for Insurance 
+                            txtInsuranceStreet.Text = rdr["InsPayToAddress"].ToString();
+                            txtInsuranceCity.Text = rdr["InsPayToCity"].ToString();
+                            txtInsuranceState.Text = rdr["InsPayToState"].ToString();
+                            txtInsuranceZip.Text = rdr["InsPayToZip"].ToString();
+
+                            // address information for Billing  address and physical 
+
+                            txtBillingStreet.Text = rdr["PhysicalAddress"].ToString();
+                            txtBillingCity.Text = rdr["PhysicalCity"].ToString();
+                            txtBillingState.Text = rdr["PhysicalState"].ToString();
+                            txtBillingZip.Text = rdr["PhysicalZip"].ToString();
+                        }
+                    }
+
+                }
+            }
+        }
+
+        private string GetAccessTokenFromRefreshToken(FrmClientZohoApiCredentials zohoCred)
+        {
+            try
+            {
+                string postData = $"refresh_token={zohoCred.RefreshToken}&client_id={zohoCred.ClientId}&client_secret={zohoCred.ClientSecret}&grant_type=refresh_token";
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(zohoAuthUrl);
+                byte[] data = Encoding.UTF8.GetBytes(postData);
+
+                request.Method = "POST";
+                request.ContentType = "application/x-www-form-urlencoded";
+                request.ContentLength = data.Length;
+
+                using (Stream stream = request.GetRequestStream())
+                {
+                    stream.Write(data, 0, data.Length);
+                }
+
+                using (WebResponse response = request.GetResponse())
+                using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                {
+                    var responseText = reader.ReadToEnd();
+                    JObject tokenObj = JObject.Parse(responseText);
+                    return tokenObj["access_token"]?.ToString() ?? string.Empty;
+                }
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        private string MakeZohoApiRequest(string method, string url, string accessToken, string jsonPayload = null)
+        {
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                request.Method = method;
+                request.Headers.Add("Authorization", $"Zoho-oauthtoken {accessToken}");
+
+                if (jsonPayload != null)
+                {
+                    byte[] byteArray = Encoding.UTF8.GetBytes(jsonPayload);
+                    request.ContentType = "application/json";
+                    request.ContentLength = byteArray.Length;
+                    using (Stream dataStream = request.GetRequestStream())
+                    {
+                        dataStream.Write(byteArray, 0, byteArray.Length);
+                    }
+                }
+
+                using (WebResponse response = request.GetResponse())
+                using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+            catch (WebException ex)
+            {
+                // Handle only GET method error by returning null
+                if (method == "GET")
+                {
+                    return null;
+                }
+
+                // For PUT or other methods, optionally rethrow or log the exception
+                throw; // Or log and return error details if preferred
+            }
+        }
+
     }
 }
 
@@ -1201,6 +1093,3 @@ public class FrmClientZohoApiCredentials
     public string ClientSecret { get; set; }
     public string RefreshToken { get; set; }
 }
-
-
-
