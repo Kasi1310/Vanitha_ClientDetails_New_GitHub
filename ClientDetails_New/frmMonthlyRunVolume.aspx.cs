@@ -1,5 +1,6 @@
 ﻿using ClientDetails.App_Code;
 using DocumentFormat.OpenXml.ExtendedProperties;
+using DocumentFormat.OpenXml.Office2013.Excel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -7,6 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Configuration;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -142,24 +144,30 @@ namespace ClientDetails
             sb.Append("</body>");
             sb.Append("</html>");
 
-            clsLowRunSummaryToZohoCRM objSendDataToZoho = new clsLowRunSummaryToZohoCRM();
-            string accessToken = objSendDataToZoho.GetAccessTokenFromRefreshToken();
-            if (accessToken != "")
-            {
-                string searchUrl = $"{zohoApiUrl}/Accounts/search?criteria=(Account_Number:equals:{Uri.EscapeDataString(CompanyId)})";
-                var searchResponse = objSendDataToZoho.MakeZohoApiRequest("GET", searchUrl, accessToken);
-                if (searchResponse != null) // Old = Zoho Data & New = CCMS Changed Data
-                {
-                    JObject responseJson = JObject.Parse(searchResponse);
-                    JArray records = (JArray)responseJson["data"];
-                    if (records != null && records.Count > 0)
-                    {
-                        string recordId = records[0]["id"].ToString();
+            string text = hdnType.Value == "CAE" ? "question(s)" : "comment";
+            string rawTitle = text.ToLower();
+            string title = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(rawTitle);
 
-                        var notePayload = new
+            if (objclsLowRunSummary.Comment.Trim() != "")
+            {
+                clsLowRunSummaryToZohoCRM objSendDataToZoho = new clsLowRunSummaryToZohoCRM();
+                string accessToken = objSendDataToZoho.GetAccessTokenFromRefreshToken();
+                if (accessToken != "")
+                {
+                    string searchUrl = $"{zohoApiUrl}/Accounts/search?criteria=(Account_Number:equals:{Uri.EscapeDataString(CompanyId)})";
+                    var searchResponse = objSendDataToZoho.MakeZohoApiRequest("GET", searchUrl, accessToken);
+                    if (searchResponse != null) // Old = Zoho Data & New = CCMS Changed Data
+                    {
+                        JObject responseJson = JObject.Parse(searchResponse);
+                        JArray records = (JArray)responseJson["data"];
+                        if (records != null && records.Count > 0)
                         {
-                            data = new[]
+                            string recordId = records[0]["id"].ToString();
+
+                            var notePayload = new
                             {
+                                data = new[]
+                                {
                             new
                             {
                                 Note_Title = "",
@@ -168,13 +176,69 @@ namespace ClientDetails
                                 se_module = "Accounts"
                             }
                         }
-                        };
+                            };
 
 
-                        string noteJson = JsonConvert.SerializeObject(notePayload);
-                        objSendDataToZoho.MakeZohoApiRequest("POST", zohoNotesUrl, accessToken, noteJson);
+                            string noteJson = JsonConvert.SerializeObject(notePayload);
+                            var responseString = objSendDataToZoho.MakeZohoApiRequest("POST", zohoNotesUrl, accessToken, noteJson);
+
+                            var json = JObject.Parse(responseString);
+                            var status = json["data"]?[0]?["status"]?.ToString();
+
+                            if (status == "success")
+                            {
+                                var noteId = json["data"]?[0]?["details"]?["id"]?.ToString();
+                                string script = $@"
+                                        <script>
+                                            Swal.fire({{
+                                                title: 'Thank you!',
+                                                text: 'Your {title} has been added successfully.',
+                                                icon: 'success',
+                                                confirmButtonText: 'OK'
+                                            }});
+                                        </script>";
+
+                                ClientScript.RegisterStartupScript(this.GetType(), "swal", script, false);
+
+                                // Clear and disable controls (server-side)
+                                txtComment.Enabled = false;
+                                btnSubmit.Enabled = false;
+
+                                Console.WriteLine($"Note added successfully. ID: {noteId}");
+                            }
+                            else
+                            {
+                                var message = json["data"]?[0]?["message"]?.ToString();
+                                string script = $@"
+                                            <script>
+                                                Swal.fire({{
+                                                    title: 'Failed to {title}',
+                                                    text: '{message?.Replace("'", "\\'")}',
+                                                    icon: 'error',
+                                                    confirmButtonText: 'OK'
+                                                }});
+                                            </script>";
+
+                                ClientScript.RegisterStartupScript(this.GetType(), "swalError", script, false);
+                                Console.WriteLine($"Failed to add note. Message: {message}");
+                            }
+                        }
                     }
                 }
+            }
+            else
+            {
+                string script = $@"
+                                <script>
+                                    Swal.fire({{
+                                        title: '{title} is required',
+                                        text: 'Please enter a {text} before submitting.',
+                                        icon: 'warning',
+                                        confirmButtonText: 'OK'
+                                    }});
+                                </script>";
+
+                ClientScript.RegisterStartupScript(this.GetType(), "swal", script, false);
             }
 
             clsSendMail objclsSendMail = new clsSendMail();
