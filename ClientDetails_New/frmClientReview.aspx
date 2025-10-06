@@ -352,6 +352,7 @@
 
 </head>
 <body>
+    <input type="text" id="formType" runat="server" hidden value="" />
     <form id="clientReviewForm" runat="server">
         <div id="loader" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0;background: rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
             <div class="spinner-border text-light" role="status">
@@ -375,9 +376,9 @@
                         <td style="display: inline-block; width: 8%;">
                             <div class="form-group">
                                 <label class="form-label" for="clientNumber">CLIENT#:</label>
-                                <select id="clientNumber" name="clientNumber" class="form-control search-dropdown" style="text-align:center;">
-                                    <option value="">SELECT</option>
-                                </select>
+                                <asp:DropDownList ID="clientNumber" runat="server" CssClass="form-control search-dropdown" Style="text-align:center;">
+                                    <asp:ListItem Text="SELECT" Value="" />
+                                </asp:DropDownList>
                                 <span id="frvclientNumber" style="color:Red; display:none;">CLIENT# IS REQUIRED</span>
                             </div>
                         </td>
@@ -1452,10 +1453,41 @@
             $('#loader').css('display', 'none');
         }
 
+        //function populateReviewForm(data) {
+        //    if (!data) return;
+
+        //    $('#clientName').val(data.clientName || '');
+        //    $('#clientNumber').val(data.clientNumber || '');
+        //    $('#aeEmail').val(data.aeEmail || '');
+        //    $('#meetingDate').val(data.meetingDate || '');
+        //    $('#description').val(data.description || '');
+
+        //    $('#formType').val(formType || 'NEW');
+        //}
+
+        function populateReviewForm(data) {
+            if (!data) return;
+
+            Object.keys(data).forEach(function (key) {
+                var value = data[key] ?? ''; // use empty string if value is null/undefined
+                var $element = $('#' + key);
+
+                if ($element.length > 0) {
+                    // Handle different types of elements if needed
+                    if ($element.is('input') || $element.is('textarea') || $element.is('select')) {
+                        $element.val(value);
+                    } else {
+                        $element.text(value);
+                    }
+                }
+            });
+
+            // Set formType based on input (if available), fallback to "NEW"
+            $('#formType').val(data.formType || 'NEW');
+        }
 
 
         $(document).ready(function () {
-            loadClientNumbers();
             // Apply flatpickr to ALL .datepicker fields
             $(".datepicker").flatpickr({
                 dateFormat: "m/d/Y",  // MM/DD/YYYY
@@ -1506,6 +1538,14 @@
 
             // Optional: Set placeholder text for all datepickers
             $(".datepicker").attr("placeholder", "MM/DD/YYYY");
+
+
+            if (typeof reviewData !== 'undefined' && reviewData !== null) {
+                populateReviewForm(reviewData);
+            } else {
+                // No reviewData: fresh form load
+                $('#formType').val(formType || 'NEW');
+            }
 
             // Show/hide Non-Transport comments on radio change
             $('input[name="nonTransport"]').change(function () {
@@ -1702,29 +1742,29 @@
             $("span[id^='frv']").hide();
         }
 
-        function loadClientNumbers() {
-            showLoader();
-            $.ajax({
-                type: "POST",
-                url: "frmClientReview.aspx/GetClientNumbers",
-                data: '{}',
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function (response) {
-                    let ddl = $('#clientNumber');
-                    ddl.empty();
-                    ddl.append('<option value="">SELECT</option>');
+        //function loadClientNumbers() {
+        //    showLoader();
+        //    $.ajax({
+        //        type: "POST",
+        //        url: "frmClientReview.aspx/GetClientNumbers",
+        //        data: '{}',
+        //        contentType: "application/json; charset=utf-8",
+        //        dataType: "json",
+        //        success: function (response) {
+        //            let ddl = $('#clientNumber');
+        //            ddl.empty();
+        //            ddl.append('<option value="">SELECT</option>');
 
-                    $.each(response.d, function (i, item) {
-                        ddl.append($('<option></option>').val(item.Value).text(item.Text));
-                    });
-                    hideLoader();
-                },
-                error: function (xhr, status, error) {
-                    console.error("Error loading client numbers:", error);
-                }
-            });
-        }
+        //            $.each(response.d, function (i, item) {
+        //                ddl.append($('<option></option>').val(item.Value).text(item.Text));
+        //            });
+        //            hideLoader();
+        //        },
+        //        error: function (xhr, status, error) {
+        //            console.error("Error loading client numbers:", error);
+        //        }
+        //    });
+        //}
 
         function formatDateString(dateString) {
             if (!dateString) return '';
@@ -1877,6 +1917,7 @@
                     var result = response.d || response;
                     if (result.success) {
                         alert('Success! Review ID: ' + result.reviewId);
+                        clearClientForm();
                     } else {
                         alert('Error: ' + result.message);
                     }
@@ -1971,7 +2012,7 @@
                 // Find matching element(s) in the cloned DOM
                 const $clonedElement = $clonedDoc.find(`[name="${name}"], [id="${name}"]`);
 
-                if ($original.is('textarea') || type === 'text' || type === 'number' || type === 'date') {
+                if ($original.is('textarea') || type === 'text' || type === 'number' || type === 'date'  || type === 'email') {
                     $clonedElement.val(value);
                     $clonedElement.attr('value', value); // ensure it's reflected in HTML
                 }

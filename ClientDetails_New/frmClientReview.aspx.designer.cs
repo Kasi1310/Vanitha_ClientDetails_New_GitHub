@@ -15,6 +15,15 @@ namespace ClientDetails
     {
 
         /// <summary>
+        /// formType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlInputText formType;
+
+        /// <summary>
         /// clientReviewForm control.
         /// </summary>
         /// <remarks>
@@ -22,5 +31,14 @@ namespace ClientDetails
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.HtmlControls.HtmlForm clientReviewForm;
+
+        /// <summary>
+        /// clientNumber control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList clientNumber;
     }
 }
