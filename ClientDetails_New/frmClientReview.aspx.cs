@@ -16,6 +16,7 @@ using System.Net.Mail;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Script.Serialization;
 using System.Web.Services;
@@ -264,10 +265,10 @@ namespace ClientDetails
                     {
                         if (rdr.Read())
                         {
-                            result["ClientName"] = rdr["CompanyName"]?.ToString() ?? "";
-                            result["AccountExecutive"] = rdr["AccountExecutive"]?.ToString() ?? "";
-                            result["Email"] = rdr["AccountExecutiveEmailID"]?.ToString() ?? "";
-                            result["Phone"] = rdr["AccountExecutivePhone"]?.ToString() ?? "";
+                            result["ClientName"] = rdr["CompanyName"]?.ToString().ToUpper() ?? "";
+                            result["AccountExecutive"] = rdr["AccountExecutive"]?.ToString().ToUpper() ?? "";
+                            result["Email"] = rdr["AccountExecutiveEmailID"]?.ToString().ToUpper() ?? "";
+                            result["Phone"] = rdr["AccountExecutivePhone"]?.ToString().ToUpper() ?? "";
                             result["RenewalDate"] = rdr["RenewalDate"] != DBNull.Value ? Convert.ToDateTime(rdr["RenewalDate"]).ToString("MM/dd/yyyy") : "";
                             result["FeeRate"] = rdr["FeeRate"] != DBNull.Value ? $"{Convert.ToDecimal(rdr["FeeRate"]):F2} %" : "0.00 %";
                         }
@@ -315,29 +316,29 @@ namespace ClientDetails
                                 // CHIEF
                                 if (ChiefList.Select(chief => chief.Trim().ToUpper()).Contains(ContactData["Title"]?.ToString().Trim().ToUpper()))
                                 {
-                                    result["currentChiefName"] = $"{ContactData["First_Name"]?.ToString()} {ContactData["Last_Name"]?.ToString()}";
-                                    result["newChiefName"] = $"{ContactData["First_Name"]?.ToString()} {ContactData["Last_Name"]?.ToString()}";
-                                    result["newChiefEmail"] = ContactData["Email"]?.ToString();
-                                    result["newChiefPhone"] = ContactData["Phone"]?.ToString();
+                                    result["currentChiefName"] = $"{ContactData["First_Name"]?.ToString().ToUpper()} {ContactData["Last_Name"]?.ToString().ToUpper()}";
+                                    result["newChiefName"] = $"{ContactData["First_Name"]?.ToString().ToUpper()} {ContactData["Last_Name"]?.ToString().ToUpper()}";
+                                    result["newChiefEmail"] = ContactData["Email"]?.ToString().ToUpper();
+                                    result["newChiefPhone"] = ContactData["Phone"]?.ToString().ToUpper();
                                 }
 
                                 // FISCAL OFFICER
                                 if (FiscalOfficerList.Select(fiscalOff => fiscalOff.Trim().ToUpper()).Contains(ContactData["Title"]?.ToString().Trim().ToUpper()))
                                 {
-                                    result["currentFiscalOfficer"] = $"{ContactData["First_Name"]?.ToString()} {ContactData["Last_Name"]?.ToString()}";
-                                    result["newFiscalName"] = $"{ContactData["First_Name"]?.ToString()} {ContactData["Last_Name"]?.ToString()}";
-                                    result["newFiscalEmail"] = ContactData["Email"]?.ToString();
-                                    result["newFiscalPhone"] = ContactData["Phone"]?.ToString();
+                                    result["currentFiscalOfficer"] = $"{ContactData["First_Name"]?.ToString().ToUpper()} {ContactData["Last_Name"]?.ToString().ToUpper()}";
+                                    result["newFiscalName"] = $"{ContactData["First_Name"]?.ToString().ToUpper()} {ContactData["Last_Name"]?.ToString().ToUpper()}";
+                                    result["newFiscalEmail"] = ContactData["Email"]?.ToString().ToUpper();
+                                    result["newFiscalPhone"] = ContactData["Phone"]?.ToString().ToUpper();
                                 }
 
                                 if (ContactData["Medicare_Authorized_Official"].ToString().ToUpper() == "TRUE")
                                 {
                                     authorizedOfficialDict[$"Authorized Official {i}"] = new List<string>
                                     {
-                                        $"{ContactData["First_Name"]?.ToString()} {ContactData["Last_Name"]?.ToString()}",
-                                        $"{ContactData["First_Name"]?.ToString()} {ContactData["Last_Name"]?.ToString()}",
-                                        ContactData["Email"]?.ToString(),
-                                        ContactData["Phone"]?.ToString(),
+                                        $"{ContactData["First_Name"]?.ToString().ToUpper()} {ContactData["Last_Name"]?.ToString().ToUpper()}",
+                                        $"{ContactData["First_Name"]?.ToString().ToUpper()} {ContactData["Last_Name"]?.ToString().ToUpper()}",
+                                        ContactData["Email"]?.ToString().ToUpper(),
+                                        ContactData["Phone"]?.ToString().ToUpper(),
                                     };
                                     i++;
                                 }
@@ -367,10 +368,11 @@ namespace ClientDetails
                         }
 
 
-                    result["MailStreet"] = contact["Mailing_Street"]?.ToString() ?? "";
-                    result["MailCity"] = contact["Mailing_City"]?.ToString() ?? "";
-                    result["MailState"] = contact["Mailing_State"]?.ToString() ?? "";
-                    result["MailZip"] = contact["Mailing_Zip"]?.ToString() ?? "";
+                    result["MailStreet"] = contact["Mailing_Street"]?.ToString().ToUpper() ?? "";
+                    result["MailCity"] = contact["Mailing_City"]?.ToString().ToUpper() ?? "";
+                    result["MailState"] = contact["Mailing_State"]?.ToString().ToUpper() ?? "";
+                    result["MailZip"] = contact["Mailing_Zip"]?.ToString().ToUpper() ?? "";
+                    result["zohoAccountId"] = contact["id"]?.ToString().ToUpper() ?? "";
 
                     // You can continue adding Chief, Fiscal, and Authorized Officials as needed
                 }
@@ -463,15 +465,15 @@ namespace ClientDetails
                                 result["DateOfLastRateChange"] = "";
                             }
 
-                            result["InsuranceStreet"] = rdr["InsPayToAddress"].ToString();
-                            result["InsuranceCity"] = rdr["InsPayToCity"].ToString();
-                            result["InsuranceState"] = rdr["InsPayToState"].ToString();
-                            result["InsuranceZip"] = rdr["InsPayToZip"].ToString();
+                            result["InsuranceStreet"] = rdr["InsPayToAddress"].ToString().ToUpper();
+                            result["InsuranceCity"] = rdr["InsPayToCity"].ToString().ToUpper();
+                            result["InsuranceState"] = rdr["InsPayToState"].ToString().ToUpper();
+                            result["InsuranceZip"] = rdr["InsPayToZip"].ToString().ToUpper();
 
-                            result["BillingStreet"] = rdr["PhysicalAddress"].ToString();
-                            result["BillingCity"] = rdr["PhysicalCity"].ToString();
-                            result["BillingState"] = rdr["PhysicalState"].ToString();
-                            result["BillingZip"] = rdr["PhysicalZip"].ToString();
+                            result["BillingStreet"] = rdr["PhysicalAddress"].ToString().ToUpper();
+                            result["BillingCity"] = rdr["PhysicalCity"].ToString().ToUpper();
+                            result["BillingState"] = rdr["PhysicalState"].ToString().ToUpper();
+                            result["BillingZip"] = rdr["PhysicalZip"].ToString().ToUpper();
                         }
                     }
                 }
@@ -481,21 +483,116 @@ namespace ClientDetails
         }
 
         [WebMethod]
-        public static object SubmitReview(string xmlData)
+        public static object SubmitReview(string xmlData, string formHtml)
         {
+            string zohoApiUrl = ConfigurationManager.AppSettings["ZohoApiUrl"].ToString();
+            bool result = true;
             try
             {
-                int reviewId = SaveToDatabase(xmlData);
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(xmlData);
+                int reviewId = 0;
+
+                string reviewFormType = doc.SelectSingleNode("//cReviewFormType")?.InnerText?.Trim();
+                string zohoAccountId = doc.SelectSingleNode("//zohoAccountId")?.InnerText?.Trim();
+                string requestType = "";
+                if (!string.IsNullOrEmpty(reviewFormType))
+                {
+                    if (reviewFormType.StartsWith("NEW", StringComparison.OrdinalIgnoreCase))
+                    {
+                        requestType = "NEW";// AE email
+                        reviewId = SaveToDatabase(xmlData, 0);
+                    }
+                    else
+                    {
+                        string[] parts = reviewFormType.Split('-');
+
+                        if (parts.Length == 2 && int.TryParse(parts[1], out int id))
+                        {
+                            requestType = "UPDATE";
+                            reviewId = SaveToDatabase(xmlData, id);
+                            string meetingDate = doc.SelectSingleNode("//meetingDate")?.InnerText?.Trim();
+                            DateTime parsedDate = DateTime.ParseExact(meetingDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+
+                            string formattedDate = parsedDate.ToString("yyyy-MM-dd");
+                            var updateData = new
+                            {
+                                data = new[]
+                                {
+                                    new
+                                    {
+                                        Last_Review_Date = formattedDate
+                                    }
+                                }
+                            };
+                            string updateUrl = $"{zohoApiUrl}/Accounts/{zohoAccountId}";
+                            string updateJson = JsonConvert.SerializeObject(updateData);
+                            FrmClientZohoApiCredentials ZohoCred = new FrmClientZohoApiCredentials();
+
+                            ZohoCred.ClientId = ConfigurationManager.AppSettings["ZohoClientId"].ToString();
+                            ZohoCred.ClientSecret = ConfigurationManager.AppSettings["ZohoClientSecret"].ToString();
+                            ZohoCred.RefreshToken = ConfigurationManager.AppSettings["ZohoRefreshToken"].ToString();
+                            string accessToken = GetAccessTokenFromRefreshToken(ZohoCred);
+
+                            if (!string.IsNullOrEmpty(accessToken))
+                            {
+                                string dataChangeResponse = MakeZohoApiRequest("PUT", updateUrl, accessToken, jsonPayload:updateJson);
+
+                                string htmlPath = null;
+                                string pdfPath = null;
+
+                                try
+                                {
+                                    htmlPath = SaveHtmlToTempFile(formHtml);
+                                    byte[] pdfBytes = ConvertHtmlToPdf(htmlPath);
+                                    pdfPath = Path.ChangeExtension(htmlPath, ".pdf");
+                                    string uploadUrl = $"https://www.zohoapis.com/crm/v2/Accounts/{zohoAccountId}/Attachments";
+
+                                    string response = MakeZohoApiRequest("POST", uploadUrl, accessToken, filePath:pdfPath);
+                                    if (!string.IsNullOrEmpty(response) && response.Contains("\"code\":\"SUCCESS\""))
+                                    {
+                                        result = true;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Upload failed or unexpected response: " + response);
+                                        result = false;
+                                    }
+                                }
+                                finally
+                                {
+                                    if (!string.IsNullOrEmpty(htmlPath) && File.Exists(htmlPath))
+                                        File.Delete(htmlPath);
+
+                                    if (!string.IsNullOrEmpty(pdfPath) && File.Exists(pdfPath))
+                                        File.Delete(pdfPath);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            requestType = "UPDATE";
+                            reviewId = 0;
+                        }
+                    }
+                }
 
                 string clientName = doc.SelectSingleNode("//clientName")?.InnerText;
                 string clientNumber = doc.SelectSingleNode("//clientNumber")?.InnerText;
                 string toRecipients = doc.SelectSingleNode("//aeEmail")?.InnerText;
-                toRecipients = "sageit4@medicount.com";
+                toRecipients = ConfigurationManager.AppSettings["ClientReviewFormToEmail"].ToString();
                 frmClientReview instance = new frmClientReview();
-                instance.SendEmailApproval(reviewId, clientName, clientNumber, toRecipients, "NEW");
-                return new { success = true, reviewId = reviewId };
+
+                if (reviewFormType.StartsWith("NEW", StringComparison.OrdinalIgnoreCase))
+                {
+                    instance.SendEmailApproval(reviewId, clientName, clientNumber, toRecipients, requestType);
+                    return new { success = true, reviewId = reviewId, message = "Form Submitted Successfully!"};
+                }
+                else
+                {
+                    return new { success = result, reviewId = reviewId, message = "Form Submitted Successfully!" };
+                }
+                
             }
             catch (Exception ex)
             {
@@ -529,35 +626,57 @@ namespace ClientDetails
         }
 
 
-        private static int SaveToDatabase(string xmlData)
+        private static int SaveToDatabase(string xmlData, int reviewId = 0)
         {
-            int reviewId = 0;
             string connectionString = ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString;
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            if ( reviewId == 0)
             {
-                using (SqlCommand command = new SqlCommand("sp_InsertClientReview", connection))
+                using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-                    command.CommandType = CommandType.StoredProcedure;
-                    SqlParameter xmlParam = new SqlParameter("@XmlData", SqlDbType.Xml)
+                    using (SqlCommand command = new SqlCommand("spCRF_InsertClientReview", connection))
                     {
-                        Value = xmlData
-                    };
-                    command.Parameters.Add(xmlParam);
+                        command.CommandType = CommandType.StoredProcedure;
+                        SqlParameter xmlParam = new SqlParameter("@XmlData", SqlDbType.Xml)
+                        {
+                            Value = xmlData
+                        };
+                        command.Parameters.Add(xmlParam);
 
-                    SqlParameter idParam = new SqlParameter("@ReviewID", SqlDbType.Int)
-                    {
-                        Direction = ParameterDirection.Output
-                    };
-                    command.Parameters.Add(idParam);
+                        SqlParameter idParam = new SqlParameter("@ReviewID", SqlDbType.Int)
+                        {
+                            Direction = ParameterDirection.Output
+                        };
+                        command.Parameters.Add(idParam);
 
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                    reviewId = Convert.ToInt32(idParam.Value);
+                        connection.Open();
+                        command.ExecuteNonQuery();
+                        reviewId = Convert.ToInt32(idParam.Value);
+                    }
                 }
             }
-
-            return reviewId;
+            else
+            {
+                string storedProcedureName = "spCRF_UpdateClientReview";
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    using (SqlCommand command = new SqlCommand(storedProcedureName, connection))
+                    {
+                        // Indicate that this is a stored procedure, not a regular SQL query
+                        command.CommandType = System.Data.CommandType.StoredProcedure;
+                        SqlParameter xmlParam = new SqlParameter("@XmlData", SqlDbType.Xml)
+                        {
+                            Value = xmlData
+                        };
+                        command.Parameters.Add(xmlParam);
+                        // Add parameters for the stored procedure
+                        command.Parameters.AddWithValue("@ReviewId", reviewId);
+                        // Execute the stored procedure
+                        connection.Open();
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+                return reviewId;
         }
 
         private static string BuildHtmlFromXml(string xmlData)
@@ -576,7 +695,7 @@ namespace ClientDetails
             if (!Directory.Exists(folder))
                 Directory.CreateDirectory(folder);
 
-            string fileName = "ClientReview_" + Guid.NewGuid() + ".html";
+            string fileName = "ClientReviewForm_" + Guid.NewGuid() + ".html";
             string path = Path.Combine(folder, fileName);
             File.WriteAllText(path, html, Encoding.UTF8);
             return path;
@@ -693,7 +812,7 @@ namespace ClientDetails
             }
         }
 
-        private static string MakeZohoApiRequest(string method, string url, string accessToken, string jsonPayload = null)
+        private static string MakeZohoApiRequest(string method, string url, string accessToken, string jsonPayload = null, string filePath = null)
         {
             try
             {
@@ -701,7 +820,43 @@ namespace ClientDetails
                 request.Method = method;
                 request.Headers.Add("Authorization", $"Zoho-oauthtoken {accessToken}");
 
-                if (jsonPayload != null)
+                if (filePath != null && File.Exists(filePath))
+                {
+                    // --- File upload logic ---
+                    string boundary = "---------------------------" + DateTime.Now.Ticks.ToString("x");
+                    byte[] boundaryBytes = Encoding.ASCII.GetBytes($"\r\n--{boundary}\r\n");
+                    byte[] trailer = Encoding.ASCII.GetBytes($"\r\n--{boundary}--\r\n");
+
+                    request.ContentType = $"multipart/form-data; boundary={boundary}";
+                    request.KeepAlive = true;
+
+                    using (Stream requestStream = request.GetRequestStream())
+                    {
+                        // Add file part
+                        requestStream.Write(boundaryBytes, 0, boundaryBytes.Length);
+
+                        //string fileHeader = $"Content-Disposition: form-data; name=\"file\"; filename=\"{Path.GetFileName(filePath)}\"\r\nContent-Type: application/octet-stream\r\n\r\n";
+                        string fileHeader = $"Content-Disposition: form-data; name=\"file\"; filename=\"ClientReviewForm_{DateTime.Now.ToString("MM-dd-yyyy-HHmmss")}.pdf\"\r\nContent-Type: application/octet-stream\r\n\r\n";
+                        byte[] fileHeaderBytes = Encoding.UTF8.GetBytes(fileHeader);
+                        requestStream.Write(fileHeaderBytes, 0, fileHeaderBytes.Length);
+
+                        byte[] fileData = File.ReadAllBytes(filePath);
+                        requestStream.Write(fileData, 0, fileData.Length);
+
+                        // Optionally, add JSON payload or other form parts
+                        if (!string.IsNullOrEmpty(jsonPayload))
+                        {
+                            requestStream.Write(boundaryBytes, 0, boundaryBytes.Length);
+                            string jsonPart = $"Content-Disposition: form-data; name=\"data\"\r\n\r\n{jsonPayload}";
+                            byte[] jsonPartBytes = Encoding.UTF8.GetBytes(jsonPart);
+                            requestStream.Write(jsonPartBytes, 0, jsonPartBytes.Length);
+                        }
+
+                        // End boundary
+                        requestStream.Write(trailer, 0, trailer.Length);
+                    }
+                }
+                else if (jsonPayload != null)
                 {
                     byte[] byteArray = Encoding.UTF8.GetBytes(jsonPayload);
                     request.ContentType = "application/json";
@@ -720,14 +875,20 @@ namespace ClientDetails
             }
             catch (WebException ex)
             {
-                // Handle only GET method error by returning null
+                // Optionally log the error response for debugging
+                using (var errorResponse = (HttpWebResponse)ex.Response)
+                using (var reader = new StreamReader(errorResponse.GetResponseStream()))
+                {
+                    string errorText = reader.ReadToEnd();
+                    Console.WriteLine("Error: " + errorText);
+                }
+
                 if (method == "GET")
                 {
                     return null;
                 }
 
-                // For PUT or other methods, optionally rethrow or log the exception
-                throw; // Or log and return error details if preferred
+                throw; // Or return a structured error response
             }
         }
 
@@ -771,50 +932,21 @@ namespace ClientDetails
             List<string> recipients = new List<string>();
             List<string> bccMails = new List<string>();
             List<string> ccMails = new List<string>();
-            recipients.Add(toRecipients);
-            //using (SqlConnection conn = new SqlConnection(connectionString))
-            //{
-            //    conn.Open();
-            //    {
-            //        SqlCommand cmd = new SqlCommand("[dbo].[spZoho_GetEmailApprover]", conn);
-            //        cmd.CommandType = CommandType.StoredProcedure;
-            //        cmd.Parameters.AddWithValue("@Category", Category.ToUpper());
-
-            //        using (SqlDataReader reader = cmd.ExecuteReader())
-            //        {
-            //            while (reader.Read())
-            //            {
-            //                if (!reader.IsDBNull(0))  // assuming email is in the first column
-            //                {
-            //                    string email = reader.GetString(0).Trim();
-            //                    string recipientType = reader.GetString(1).Trim();
-            //                    string category = reader.GetString(2).Trim();
-            //                    if (recipientType == "TO")
-            //                    {
-            //                        recipients.Add(email);
-            //                    }
-            //                    else if (recipientType == "CC")
-            //                    {
-            //                        ccMails.Add(email);
-            //                    }
-            //                    else if (recipientType == "BCC")
-            //                    {
-            //                        bccMails.Add(email);
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-
-            //}
+            recipients.AddRange(
+                toRecipients
+                    .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(email => email.Trim())
+                    .Where(email => !string.IsNullOrWhiteSpace(email))
+            );
 
             string token = Guid.NewGuid().ToString(); // Unique per recipient
             Uri currentUri = HttpContext.Current.Request.Url;
-
             string[] segments = currentUri.Segments;
-            int aspxIndex = Array.FindLastIndex(segments, s => s.EndsWith(".aspx", StringComparison.OrdinalIgnoreCase));
-            string basePath = string.Join("", segments.Take(aspxIndex + 1));
-            string baseUrl = $"{currentUri.Scheme}://{currentUri.Authority}{basePath}?";
+            int aspxIndex = Array.FindLastIndex(segments, s => s.TrimEnd('/').EndsWith(".aspx", StringComparison.OrdinalIgnoreCase));
+            string basePath = aspxIndex >= 0
+                ? string.Join("", segments.Take(aspxIndex + 1))
+                : string.Join("", segments); // fallback if .aspx not found
+            string baseUrl = $"{currentUri.Scheme}://{currentUri.Authority}{basePath.TrimEnd('/')}?";
 
 
             List<string> failedRecipients = new List<string>();
