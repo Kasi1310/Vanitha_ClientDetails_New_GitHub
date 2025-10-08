@@ -64,7 +64,8 @@ namespace ClientDetails
                         {
                             string xmlData = LoadReviewXml(reviewId);
 
-                            Dictionary<string, string> reviewData = new Dictionary<string, string>();
+                            // Dictionary<string, object> to hold mixed simple values and recipient list
+                            Dictionary<string, object> reviewData = new Dictionary<string, object>();
 
                             if (!string.IsNullOrEmpty(xmlData))
                             {
@@ -72,16 +73,49 @@ namespace ClientDetails
                                 doc.LoadXml(xmlData);
 
                                 XmlNode root = doc.DocumentElement;
+
                                 foreach (XmlNode node in root.ChildNodes)
                                 {
-                                    if (node.NodeType == XmlNodeType.Element)
+                                    if (node.NodeType != XmlNodeType.Element)
+                                        continue;
+
+                                    if (node.Name.StartsWith("__"))
+                                        continue;
+
+                                    if (node.Name == "recipients")
                                     {
+                                        // Process recipients node
+                                        var recipients = new List<Dictionary<string, string>>();
+
+                                        foreach (XmlNode recipientNode in node.ChildNodes)
+                                        {
+                                            if (recipientNode.Name != "recipient")
+                                                continue;
+
+                                            var recipientDict = new Dictionary<string, string>();
+
+                                            var nameNode = recipientNode.SelectSingleNode("recipientReceivingName");
+                                            var titleNode = recipientNode.SelectSingleNode("recipientReceivingTitle");
+                                            var emailNode = recipientNode.SelectSingleNode("recipientReceivingEmail");
+
+                                            recipientDict["recipientReceivingName"] = nameNode?.InnerText ?? "";
+                                            recipientDict["recipientReceivingTitle"] = titleNode?.InnerText ?? "";
+                                            recipientDict["recipientReceivingEmail"] = emailNode?.InnerText ?? "";
+
+                                            recipients.Add(recipientDict);
+                                        }
+
+                                        reviewData["recipients"] = recipients;
+                                    }
+                                    else
+                                    {
+                                        // Normal single-value nodes stored directly
                                         reviewData[node.Name] = node.InnerText;
                                     }
                                 }
-                                //reviewData["clientName"] = doc.SelectSingleNode("//clientName")?.InnerText ?? "";
                             }
 
+                            // Serialize to JSON
                             JavaScriptSerializer jsSerializer = new JavaScriptSerializer();
                             string jsonReviewData = jsSerializer.Serialize(reviewData);
 
@@ -92,7 +126,7 @@ namespace ClientDetails
                         </script>";
                             formType.Value = $"UPDATE-{reviewId}";
 
-                            string clientNumberValue = reviewData.ContainsKey("clientNumber") ? reviewData["clientNumber"] : "";
+                            string clientNumberValue = reviewData.ContainsKey("clientNumber") ? reviewData["clientNumber"] as string ?? "" : "";
                             clientNumber.Items.Clear();
                             clientNumber.Items.Add(new ListItem(clientNumberValue, clientNumberValue));
                             clientNumber.SelectedValue = clientNumberValue;

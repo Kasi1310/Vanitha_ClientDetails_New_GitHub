@@ -368,7 +368,7 @@
             </div>
             <h1 class="text-center mb-4" style="font-family: Calibri; font-size: 40px; font-weight: bold; color: #009094; text-align: center;background: white;">CLIENT REVIEW</h1>
 
-            <!-- Meeting Details Section -->
+            <!-- MEETING DETAILS Section -->
             <div class="section" style="margin-bottom: 35px;padding: 25px;background-color: #fff;border-radius: 10px;box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);border-left: 5px solid rgb(0,148,144);transition: transform 0.3s ease, box-shadow 0.3s ease;">
                 <h3 class="section-title" style="font-weight: 700;color: rgb(0,175,169);margin-bottom: 25px;padding-bottom: 10px;border-bottom: 2px solid rgb(101,203,201);font-size: 1.3rem;display: flex;align-items: center;counter-increment: section;">MEETING DETAILS</h3>
 
@@ -426,38 +426,51 @@
 
                     <!-- Row 3 -->
                     <tr style="text-align:center !important;">
-                        <td style="display: inline-block; width: 33.33%;">
-                            <div class="form-group">
-                                <label class="form-label" for="recipientReceivingName">RECIPIENT RECEIVING NAME:</label>
-                                <input type="text" id="recipientReceivingName" name="recipientReceivingName" class="form-control" style="text-align:center;" required/>
-                                <span id="rfvRecipientReceivingName" style="color: Red; display: none;">
-                                    RECIPIENT RECEIVING NAME IS REQUIRED
-                                </span>
-                            </div>
-                        </td>
-                        <td style="display: inline-block; width: 33.33%;">
-                            <div class="form-group">
-                                <label class="form-label" for="recipientReceivingTitle">RECIPIENT RECEIVING TITLE:</label>
-                                <input type="text" id="recipientReceivingTitle" name="recipientReceivingTitle" class="form-control" style="text-align:center;" />
-                                <span id="rfvRecipientReceivingTitle" style="color: Red; display: none;">
-                                    RECIPIENT RECEIVING TITLE IS REQUIRED
-                                </span>
-                            </div>
-                        </td>
-                        <td style="display: inline-block; width: 33.33%;">
-                            <div class="form-group">
-                                <label class="form-label" for="recipientReceivingEmail">RECIPIENT RECEIVING EMAIL:</label>
-                                <input type="email" id="recipientReceivingEmail" name="recipientReceivingEmail" class="form-control" style="text-align:center;" />
-                                <span id="rfvRecipientReceivingEmail" style="color: Red; display: none;">
-                                    RECIPIENT RECEIVING EMAIL IS REQUIRED
-                                </span>
-                            </div>
-                        </td>
+                        <table style="width: 100%;">
+                            <tbody id="recipientContainer">
+                                <!-- First Row (with labels) -->
+                                <tr class="recipientRow" style="text-align:center;">
+                                    <td style="display: inline-block; width: 33.33%; vertical-align: top;">
+                                        <div class="form-group">
+                                            <label class="form-label">RECIPIENT RECEIVING NAME:</label>
+                                            <input type="text" name="recipientReceivingName" class="form-control" style="text-align:center;"/>
+                                            <span style="color: Red; display: none;">
+                                                RECIPIENT RECEIVING NAME IS REQUIRED
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td style="display: inline-block; width: 33.33%; vertical-align: top;">
+                                        <div class="form-group">
+                                            <label class="form-label">RECIPIENT RECEIVING TITLE:</label>
+                                            <input type="text" name="recipientReceivingTitle" class="form-control" style="text-align:center;" />
+                                            <span style="color: Red; display: none;">
+                                                RECIPIENT RECEIVING TITLE IS REQUIRED
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td style="display: inline-block; width: 33.33%; vertical-align: top;">
+                                        <div class="form-group">
+                                            <label class="form-label">RECIPIENT RECEIVING EMAIL:</label>
+                                            <input type="email" name="recipientReceivingEmail" class="form-control" style="text-align:center;" />
+                                            <span style="color: Red; display: none;">
+                                                RECIPIENT RECEIVING EMAIL IS REQUIRED
+                                            </span>
+                                            <div class="recipientButtons pdf-exclude" style="text-align: right; margin-top: 5px;">
+                                                <button type="button" class="btn btn-success addRecipient">+</button>
+                                            </div>
+                                        </div>
+
+                                        
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </tr>
+
                 </table>
             </div>
 
-            <!-- RPT and Collection Rates Section -->
+            <!-- PERFORMANCE METRICS Section -->
             <div class="section" style="margin-bottom: 35px; padding: 25px; background-color: #fff; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); border-left: 5px solid rgb(0, 148, 144); transition: transform 0.3s ease, box-shadow 0.3s ease;">
                 <h3 class="section-title" style="font-weight: 700; color: rgb(0, 175, 169); margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid rgb(101, 203, 201); font-size: 1.3rem; display: flex; align-items: center; counter-increment: section;">
                     PERFORMANCE METRICS
@@ -554,7 +567,7 @@
                 </table>
             </div>
 
-            <!-- Billing Rate Review Section -->
+            <!-- CHARGE RATES Section -->
             <div class="section" style="margin-bottom: 35px; padding: 25px; background-color: #fff; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); border-left: 5px solid rgb(0,148,144); transition: transform 0.3s ease, box-shadow 0.3s ease;">
               <h3 class="section-title" style="font-weight: 700; color: rgb(0,175,169); margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid rgb(101,203,201); font-size: 1.3rem; display: flex; align-items: center;">
                 YOUR CHARGE RATES
@@ -686,7 +699,7 @@
               </table>
             </div>
 
-            <!-- Contract Status Section -->
+            <!-- CONTRACT STATUS Section -->
             <div class="section" style="margin-bottom: 35px; padding: 25px; background-color: #fff; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); border-left: 5px solid rgb(0,148,144); transition: transform 0.3s ease, box-shadow 0.3s ease;">
               <h3 class="section-title" style="font-weight: 700; color: rgb(0,175,169); margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid rgb(101,203,201); font-size: 1.3rem; display: flex; align-items: center;">
                 CONTRACT STATUS
@@ -732,7 +745,7 @@
             </div>
 
 
-            <!-- Personnel Changes Section -->
+            <!-- PERSONNEL CHANGES Section -->
             <div class="section" style="margin-bottom: 35px; padding: 25px; background-color: #fff; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); border-left: 5px solid rgb(0,148,144); transition: transform 0.3s ease, box-shadow 0.3s ease;">
               <h3 class="section-title" style="font-weight: 700; color: rgb(0,175,169); margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid rgb(101,203,201); font-size: 1.3rem; display: flex; align-items: center; counter-increment: section;">
                 PERSONNEL CHANGES
@@ -903,7 +916,7 @@
               </table>
             </div>
 
-            <!-- Address Information Section -->
+            <!-- ADDRESS(ADD) INFORMATION Section -->
             <div class="section" style="margin-bottom: 35px;padding: 25px;background-color: #fff;border-radius: 10px;box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);border-left: 5px solid rgb(0,148,144);transition: transform 0.3s ease, box-shadow 0.3s ease;">
                 <h3 class="section-title" style="font-weight: 700;color: rgb(0,175,169);margin-bottom: 25px;padding-bottom: 10px;border-bottom: 2px solid rgb(101,203,201);font-size: 1.3rem;display: flex;align-items: center;counter-increment: section;">
                     ADDRESS(ADD) INFORMATION
@@ -943,16 +956,14 @@
                       <div class="form-label" style="margin-bottom: 10px;">
                         If there are any changes to the above Address:
                       </div>
-                      <div style="display: flex; justify-content: center; gap: 30px;">
-                        <label style="display: flex; align-items: center;">
+                        <span style="margin: 0 10px;">
                           <input type="radio" id="rbBillingAddressYes" name="billingAddress" value="yes" />
-                          <span style="margin-left: 5px;cursor:pointer;">Yes</span>
-                        </label>
-                        <label style="display: flex; align-items: center;">
+                          <label for="rbBillingAddressYes" style="cursor:pointer;">Yes</label>
+                        </span>
+                        <span>
                           <input type="radio" id="rbBillingAddressNo" name="billingAddress" value="no" checked />
-                          <span style="margin-left: 5px;cursor:pointer;">No</span>
-                        </label>
-                      </div>
+                          <label for="rbBillingAddressNo" style="cursor:pointer;">No</label>
+                        </span>
                     </td>
                   </tr>
 
@@ -1018,16 +1029,14 @@
                       <div class="form-label" style="margin-bottom: 10px;">
                         If there are any changes to the above Address:
                       </div>
-                      <div style="display: flex; justify-content: center; gap: 30px;">
-                        <label style="display: flex; align-items: center;">
+                        <span style="margin: 0 10px;">
                           <input type="radio" id="rbMailingAddressYes" name="mailingAddress" value="yes" />
-                          <span style="margin-left: 5px;cursor:pointer;">Yes</span>
-                        </label>
-                        <label style="display: flex; align-items: center;">
+                          <label for="rbMailingAddressYes" style="cursor:pointer;">Yes</label>
+                        </span>
+                        <span>
                           <input type="radio" id="rbMailingAddressNo" name="mailingAddress" value="no" checked />
-                          <span style="margin-left: 5px;cursor:pointer;">No</span>
-                        </label>
-                      </div>
+                          <label for="rbMailingAddressNo" style="cursor:pointer;">No</label>
+                        </span>
                     </td>
 
                   </tr>
@@ -1092,16 +1101,14 @@
                       <div class="form-label" style="margin-bottom: 10px;">
                         If there are any changes to the above Address:
                       </div>
-                      <div style="display: flex; justify-content: center; gap: 30px;">
-                        <label style="display: flex; align-items: center;">
+                        <span style="margin: 0 10px;">
                           <input type="radio" id="rbInsurancePayToAddressYes" name="insurancePayToAddress" value="yes" />
-                          <span style="margin-left: 5px;cursor:pointer;">Yes</span>
-                        </label>
-                        <label style="display: flex; align-items: center;">
+                          <label for="rbInsurancePayToAddressYes" style="cursor:pointer;">Yes</label>
+                        </span>
+                        <span>
                           <input type="radio" id="rbInsurancePayToAddressNo" name="insurancePayToAddress" value="no" checked />
-                          <span style="margin-left: 5px;cursor:pointer;">No</span>
-                        </label>
-                      </div>
+                          <label for="rbInsurancePayToAddressNo" style="cursor:pointer;">No</label>
+                        </span>
                     </td>
                   </tr>
 
@@ -1136,7 +1143,7 @@
             </div>
 
 
-            <!-- Demographic Changes Section -->
+            <!-- DEMOGRAPHIC CHANGES Section -->
             <div class="section" style="margin-bottom: 35px; padding: 25px; background-color: #fff; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); border-left: 5px solid rgb(0,148,144); transition: transform 0.3s ease, box-shadow 0.3s ease;">
               <h3 class="section-title" style="font-weight: 700; color: rgb(0,175,169); margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid rgb(101,203,201); font-size: 1.3rem; display: flex; align-items: center; counter-increment: section;">
                 DEMOGRAPHIC CHANGES
@@ -1149,16 +1156,14 @@
                       <div class="form-label" style="margin-bottom: 10px;">
                         MAJOR BUSINESS CLOSED:
                       </div>
-                      <div style="display: flex; justify-content: center; gap: 20px;">
-                        <label style="display: flex; align-items: center;">
-                          <input type="radio" id="rbBusinessClosedYes" name="businessClosed" value="yes" />
-                          <span style="margin-left: 5px;cursor:pointer;">Yes</span>
-                        </label>
-                        <label style="display: flex; align-items: center;">
-                          <input type="radio" id="rbBusinessClosedNo" name="businessClosed" value="no" checked />
-                          <span style="margin-left: 5px;cursor:pointer;">No</span>
-                        </label>
-                      </div>
+                      <span style="margin: 0 10px;">
+                        <input type="radio" id="rbBusinessClosedYes" name="businessClosed" value="yes" />
+                        <label for="rbBusinessClosedYes" style="cursor:pointer;">Yes</label>
+                      </span>
+                      <span>
+                        <input type="radio" id="rbBusinessClosedNo" name="businessClosed" value="no" checked />
+                        <label for="rbBusinessClosedNo" style="cursor:pointer;">No</label>
+                      </span>
                   </td>
 
 
@@ -1167,16 +1172,14 @@
                       <div class="form-label" style="margin-bottom: 10px;">
                         NURSING HOME CHANGES TRANSPORTS:
                       </div>
-                      <div style="display: flex; justify-content: center; gap: 20px;">
-                        <label style="display: flex; align-items: center;">
-                          <input type="radio" id="rbNursingHomeYes" name="nursingHome" value="yes" />
-                          <span style="margin-left: 5px;cursor:pointer;">Yes</span>
-                        </label>
-                        <label style="display: flex; align-items: center;">
-                          <input type="radio" id="rbNursingHomeNo" name="nursingHome" value="no" checked />
-                          <span style="margin-left: 5px;cursor:pointer;">No</span>
-                        </label>
-                      </div>
+                      <span style="margin: 0 10px;">
+                        <input type="radio" id="rbNursingHomeYes" name="nursingHome" value="yes" />
+                        <label for="rbNursingHomeYes" style="cursor:pointer;">Yes</label>
+                     </span>
+                     <span>
+                        <input type="radio" id="rbNursingHomeNo" name="nursingHome" value="no" checked />
+                        <label for="rbNursingHomeNo" style="cursor:pointer;">No</label>
+                     </span>
                   </td>
 
 
@@ -1199,7 +1202,7 @@
               </table>
             </div>
 
-            <!-- INFORMATION FOR MEDICOUNT -->
+            <!-- INFORMATION FOR MEDICOUNT Section-->
             <div class="section" style="margin-bottom: 35px; padding: 25px; background-color: #fff; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); border-left: 5px solid rgb(0,148,144); transition: transform 0.3s ease, box-shadow 0.3s ease;">
               <h3 class="section-title" style="font-weight: 700; color: rgb(0,175,169); margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid rgb(101,203,201); font-size: 1.3rem; display: flex; align-items: center; counter-increment: section;">
                 INFORMATION FOR MEDICOUNT
@@ -1221,16 +1224,14 @@
                       <div class="form-label" style="margin-bottom: 10px;">
                         DO YOU USE THE CLIENT PORTAL:
                       </div>
-                      <div style="display: flex; justify-content: center; gap: 20px;">
-                        <label style="display: flex; align-items: center;">
-                          <input type="radio" id="rbclientPortalYes" name="clientPortal" value="yes" />
-                          <span style="margin-left: 5px;cursor:pointer;">Yes</span>
-                        </label>
-                        <label style="display: flex; align-items: center;">
-                          <input type="radio" id="rbclientPortalNo" name="clientPortal" value="no" checked />
-                          <span style="margin-left: 5px;cursor:pointer;">No</span>
-                        </label>
-                      </div>
+                      <span style="margin: 0 10px;">
+                        <input type="radio" id="rbclientPortalYes" name="clientPortal" value="yes" />
+                        <label for="rbclientPortalYes" style="cursor:pointer;">Yes</label>
+                      </span>
+                      <span>
+                        <input type="radio" id="rbclientPortalNo" name="clientPortal" value="no" checked />
+                        <label for="rbclientPortalNo" style="cursor:pointer;">No</label>
+                      </span>
                   </td>
 
 
@@ -1239,16 +1240,14 @@
                       <div class="form-label" style="margin-bottom: 10px;">
                         ARE YOU RECEIVING EMAIL ALERTS?
                       </div>
-                      <div style="display: flex; justify-content: center; gap: 20px;">
-                        <label style="display: flex; align-items: center;">
-                          <input type="radio" id="rbAlertYes" name="emailAlert" value="yes" />
-                          <span style="margin-left: 5px;cursor:pointer;">Yes</span>
-                        </label>
-                        <label style="display: flex; align-items: center;">
-                          <input type="radio" id="rbAlertNo" name="emailAlert" value="no" checked />
-                          <span style="margin-left: 5px;cursor:pointer;">No</span>
-                        </label>
-                      </div>
+                      <span style="margin: 0 10px;">
+                        <input type="radio" id="rbAlertYes" name="emailAlert" value="yes" />
+                        <label for="rbAlertYes" style="cursor:pointer;">Yes</label>
+                      </span>
+                      <span>
+                        <input type="radio" id="rbAlertNo" name="emailAlert" value="no" checked />
+                        <label for="rbAlertNo" style="cursor:pointer;">No</label>
+                      </span>
                   </td>
 
                   <!-- DO YOU CHECK THE OIG EXCLUSIONARY LIST -->
@@ -1256,16 +1255,14 @@
                       <div class="form-label" style="margin-bottom: 10px;">
                         DO YOU CHECK THE OIG EXCLUSIONARY LIST:
                       </div>
-                      <div style="display: flex; justify-content: center; gap: 20px;">
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                          <input type="radio" id="rbExclusionaryListYes" name="exclusionaryList" value="yes" />
-                          <span style="margin-left: 5px;cursor:pointer;">Yes</span>
-                        </label>
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                          <input type="radio" id="rbExclusionaryListNo" name="exclusionaryList" value="no" checked />
-                          <span style="margin-left: 5px;cursor:pointer;">No</span>
-                        </label>
-                      </div>
+                      <span style="margin: 0 10px;">
+                        <input type="radio" id="rbExclusionaryListYes" name="exclusionaryList" value="yes" />
+                        <label for="rbExclusionaryListYes" style="cursor:pointer;">Yes</label>
+                      </span>
+                      <span>
+                        <input type="radio" id="rbExclusionaryListNo" name="exclusionaryList" value="no" checked />
+                        <label for="rbExclusionaryListNo" style="cursor:pointer;">No</label>
+                      </span>
                   </td>
 
                   <!-- DO YOU QA YOUR PCR REPORT -->
@@ -1273,16 +1270,14 @@
                       <div class="form-label" style="margin-bottom: 10px;">
                         DO YOU QA YOUR PCR REPORT:
                       </div>
-                      <div style="display: flex; justify-content: center; gap: 20px;">
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                          <input type="radio" id="pcrReportBtnYes" name="pcrReport" value="yes" />
-                          <span style="margin-left: 5px;cursor:pointer;">Yes</span>
-                        </label>
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                          <input type="radio" id="pcrReportBtnNo" name="pcrReport" value="no" checked />
-                          <span style="margin-left: 5px;cursor:pointer;">No</span>
-                        </label>
-                      </div>
+                      <span style="margin: 0 10px;">
+                        <input type="radio" id="pcrReportBtnYes" name="pcrReport" value="yes" />
+                        <label for="pcrReportBtnYes" style="cursor:pointer;">Yes</label>
+                      </span>
+                      <span>
+                        <input type="radio" id="pcrReportBtnNo" name="pcrReport" value="no" checked />
+                        <label for="pcrReportBtnNo" style="cursor:pointer;">No</label>
+                      </span>
                   </td>
 
                   <!-- DO YOU RECONCILE YOUR RUNS -->
@@ -1290,16 +1285,14 @@
                       <div class="form-label" style="margin-bottom: 10px;">
                         DO YOU RECONCILE YOUR RUNS:
                       </div>
-                      <div style="display: flex; justify-content: center; gap: 20px;">
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                          <input type="radio" id="rbReconciliationYes" name="reconciliation" value="yes" />
-                          <span style="margin-left: 5px;cursor:pointer;">Yes</span>
-                        </label>
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                          <input type="radio" id="rbReconciliationNo" name="reconciliation" value="no" checked />
-                          <span style="margin-left: 5px;cursor:pointer;">No</span>
-                        </label>
-                      </div>
+                      <span style="margin: 0 10px;">
+                        <input type="radio" id="rbReconciliationYes" name="reconciliation" value="yes" />
+                        <label for="rbReconciliationYes" style="cursor:pointer;">Yes</label>
+                      </span>
+                      <span>
+                        <input type="radio" id="rbReconciliationNo" name="reconciliation" value="no" checked />
+                        <label for="rbReconciliationNo" style="cursor:pointer;">No</label>
+                      </span>
                   </td>
 
                   <!-- COMMENTS and FREQUENCY (Initially Hidden) -->
@@ -1362,7 +1355,7 @@
                 </div>
             </div>
 
-            <!-- Client Review Intervals Section -->
+            <!-- CLIENT REVIEW INTERVAL Section -->
             <div class="section" style="margin-bottom: 35px; padding: 25px; background-color: #fff; border-radius: 10px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); border-left: 5px solid rgb(0, 148, 144); transition: transform 0.3s ease, box-shadow 0.3s ease;">
               <h3 class="section-title" style="font-weight: 700; color: rgb(0, 175, 169); margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid rgb(101, 203, 201); font-size: 1.3rem; display: flex; align-items: center; counter-increment: section;">
                 CLIENT REVIEW INTERVAL - HOW OFTEN DO YOU WANT TO MEET WITH YOUR ACCOUNT EXECUTIVE
@@ -1453,14 +1446,51 @@
             $('#loader').css('display', 'none');
         }
 
-     
-
         function populateReviewForm(data) {
             if (!data) return;
 
             Object.keys(data).forEach(function (key) {
                 var value = data[key] ?? '';
                 var $element = $('#' + key);
+
+                // Special handling for recipients array
+                if (key === 'recipients' && Array.isArray(value)) {
+                    // Clear existing recipient rows except the first one
+                    // Assuming rows have a class 'recipientRow'
+                    var $container = $('#recipientContainer');
+                    $container.find('.recipientRow').not(':first').remove();
+
+                    // Populate the first recipient row
+                    if (value.length > 0) {
+                        var firstRecipient = value[0];
+                        var $firstRow = $container.find('.recipientRow:first');
+
+                        $firstRow.find('input[name="recipientReceivingName"]').val(firstRecipient.recipientReceivingName || '');
+                        $firstRow.find('input[name="recipientReceivingTitle"]').val(firstRecipient.recipientReceivingTitle || '');
+                        $firstRow.find('input[name="recipientReceivingEmail"]').val(firstRecipient.recipientReceivingEmail || '');
+                    }
+
+                    // Add extra recipient rows if more than one
+                    for (let i = 1; i < value.length; i++) {
+                        var recipient = value[i];
+                        // Clone first row
+                        var $newRow = $container.find('.recipientRow:first').clone();
+
+                        // Clear validation messages if any (optional)
+                        $newRow.find('span').hide();
+
+                        // Fill values
+                        $newRow.find('input[name="recipientReceivingName"]').val(recipient.recipientReceivingName || '');
+                        $newRow.find('input[name="recipientReceivingTitle"]').val(recipient.recipientReceivingTitle || '');
+                        $newRow.find('input[name="recipientReceivingEmail"]').val(recipient.recipientReceivingEmail || '');
+
+                        $newRow.find('label').remove();
+                        // Append cloned row
+                        $container.append($newRow);
+                    }
+
+                    return; // skip normal processing for this key
+                }
 
                 // Handle radio buttons
                 var $radioGroup = $('input[type="radio"][name="' + key + '"]');
@@ -1484,6 +1514,7 @@
                 }
             });
 
+            updateRecipientButtons();
             // Set formType based on input (if available), fallback to "NEW-0"
             $('#formType').val(formType || 'NEW-0');
         }
@@ -1571,8 +1602,120 @@
             $('input[name="mailingAddress"]').change(toggleNewMailingAddress);
             $('input[name="insurancePayToAddress"]').change(toggleNewInsPayToAddress);
 
+
+            // Add recipient row
+            $('#recipientContainer').on('click', '.addRecipient', function () {
+                const $firstRow = $('#recipientContainer .recipientRow').first();
+                const $newRow = $firstRow.clone();
+
+                // Remove labels for cloned rows
+                $newRow.find('label').remove();
+
+                // Clear inputs
+                $newRow.find('input').val('');
+
+                // Add button placeholder
+                $newRow.find('.recipientButtons').html(`
+                    <button type="button" class="btn btn-danger removeRecipient">−</button>
+                `);
+
+                $('#recipientContainer').append($newRow);
+
+                updateButtons();
+            });
+
+            // Remove recipient row
+            $('#recipientContainer').on('click', '.removeRecipient', function () {
+                const $rows = $('#recipientContainer .recipientRow');
+                if ($rows.length === 1) {
+                    alert("At least one recipient row is required.");
+                    return;
+                }
+
+                $(this).closest('.recipientRow').remove();
+
+                // After removal, check if new first row needs labels restored
+                restoreLabelsToFirstRow();
+
+                updateButtons();
+            });
         });
 
+        // Ensure correct buttons and labels after any change
+        function updateButtons() {
+            const $rows = $('#recipientContainer .recipientRow');
+
+            $rows.each(function (index) {
+                const $row = $(this);
+                const $buttonContainer = $row.find('.recipientButtons');
+
+                // Clear existing buttons
+                $buttonContainer.empty();
+
+                if ($rows.length === 1) {
+                    // Only one row: + button only
+                    $buttonContainer.append(`<button type="button" class="btn btn-success addRecipient">+</button>`);
+                } else if (index === $rows.length - 1) {
+                    // Last row: + and − buttons
+                    $buttonContainer.append(`
+                        <button type="button" class="btn btn-danger removeRecipient">−</button>
+                        <button type="button" class="btn btn-success addRecipient">+</button>
+                    `);
+                } else {
+                    // Middle rows: − button only
+                    $buttonContainer.append(`<button type="button" class="btn btn-danger removeRecipient">−</button>`);
+                }
+            });
+        }
+
+        // Ensure first row has labels (if not present)
+        function restoreLabelsToFirstRow() {
+            const $firstRow = $('#recipientContainer .recipientRow').first();
+
+            const nameInput = $firstRow.find('input[name="recipientReceivingName"]');
+            const titleInput = $firstRow.find('input[name="recipientReceivingTitle"]');
+            const emailInput = $firstRow.find('input[name="recipientReceivingEmail"]');
+
+            // Only add label if not already present
+            if (nameInput.prev('label').length === 0) {
+                nameInput.before('<label class="form-label">RECIPIENT RECEIVING NAME:</label>');
+            }
+
+            if (titleInput.prev('label').length === 0) {
+                titleInput.before('<label class="form-label">RECIPIENT RECEIVING TITLE:</label>');
+            }
+
+            if (emailInput.prev('label').length === 0) {
+                emailInput.before('<label class="form-label">RECIPIENT RECEIVING EMAIL:</label>');
+            }
+        }
+
+        function updateRecipientButtons() {
+            var $rows = $('#recipientContainer').find('.recipientRow');
+
+            $rows.each(function (index) {
+                var $row = $(this);
+                var $btnContainer = $row.find('.recipientButtons');
+
+                // Clear current buttons
+                $btnContainer.empty();
+
+                if ($rows.length === 1) {
+                    // Only one row: show only the + button
+                    $btnContainer.append('<button type="button" class="btn btn-success addRecipient">+</button>');
+                } else if (index === $rows.length - 1) {
+                    // Last row: show both + and - buttons
+                    $btnContainer.append('<button type="button" class="btn btn-success addRecipient">+</button> ');
+                    $btnContainer.append('<button type="button" class="btn btn-danger removeRecipient">-</button>');
+                } else {
+                    // Other rows: show only - button
+                    $btnContainer.append('<button type="button" class="btn btn-danger removeRecipient">-</button>');
+                }
+            });
+        }
+
+        //$('#btnSubmit').click(submitForm);
+        $('#btnGeneratePdf').click(generatepdfBtnClick);
 
         // Show/hide Non-Transport comments on radio change
         $(document).on('change', 'input[name="nonTransport"]', function () {
@@ -1616,9 +1759,7 @@
             get12MonthRange();
         });
 
-        //$('#btnSubmit').click(submitForm);
-        $('#btnGeneratePdf').click(generatepdfBtnClick);
-
+       
         $("#clientNumber").on("change", function () {
             var selectedId = $(this).val();
             showLoader();
@@ -1804,6 +1945,39 @@
 
             // Hide validation messages
             $("span[id^='frv']").hide();
+
+            // Clear and reset recipient rows
+            const $recipientRows = $('#recipientContainer .recipientRow');
+
+            if ($recipientRows.length > 1) {
+                // Remove all except the first
+                $recipientRows.slice(1).remove();
+            }
+
+            const $firstRow = $recipientRows.first();
+
+            // Clear inputs
+            $firstRow.find('input').val('');
+
+            // Restore labels if they were removed
+            if ($firstRow.find('label').length === 0) {
+                const labels = [
+                    '<label>Recipient Name</label>',
+                    '<label>Title</label>',
+                    '<label>Email</label>'
+                ];
+                $firstRow.find('td').each(function (index) {
+                    if (index < 3) {
+                        $(this).prepend(labels[index]);
+                    }
+                });
+            }
+
+            // Reset buttons in first row
+            $firstRow.find('.recipientButtons').html(`
+                <button type="button" class="btn btn-success addRecipient">+</button>
+            `);
+
         }
 
         function formatDateString(dateString) {
@@ -1884,14 +2058,6 @@
                     $("#mileage").val(data.Mileage || "");
                     var formattedRenewalDate = formatDateString(data.DateOfLastRateChange);
                     $("#dateOfLastRateChange").val(formattedRenewalDate || "");
-
-                    //$("#blsAdd").val(data.Bls || "");
-                    //$("#blsNeAdd").val(data.BlsNe || "");
-                    //$("#alsAdd").val(data.Als || "");
-                    //$("#alsNeAdd").val(data.AlsNe || "");
-                    //$("#als2Add").val(data.Als2 || "");
-                    //$("#mileageAdd").val(data.Mileage || "");
-                    //$("#dateOfLastRateChangeAdd").val(formattedRenewalDate || "");
 
                     $("#insuranceStreet").val(data.InsuranceStreet || "");
                     $("#insuranceCity").val(data.InsuranceCity || "");
@@ -2001,60 +2167,74 @@
             $("#clientRevenueNumberEndDate").trigger('change');
         }
 
-
-
         function generateXmlFromForm() {
- 
-            var xml = '<ClientReview>';
-            var processedRadioNames = {};
+            let xml = '<ClientReview>';
+            const processedRadioNames = {};
 
-            var zohoAccountId = $("#zohoAccountId").val();
-            xml += '<zohoAccountId>' + escapeXml(zohoAccountId) + '</zohoAccountId>';
+            const zohoAccountId = $("#zohoAccountId").val();
+            xml += `<zohoAccountId>${escapeXml(zohoAccountId)}</zohoAccountId>`;
 
-            var formType = $("#formType").val();
-            xml += '<cReviewFormType>' + escapeXml(formType) + '</cReviewFormType>';
+            const formType = $("#formType").val();
+            xml += `<cReviewFormType>${escapeXml(formType)}</cReviewFormType>`;
 
+            // Process all inputs except recipients
             $('#clientReviewForm').find('input, select, textarea').each(function () {
-                var name = this.name || this.id;
-                var val = '';
+                const name = this.name || this.id;
+                if (!name || name.startsWith('recipientReceiving')) return;
 
-                if (!name) return;
+                let val = '';
 
-                // Handle radio buttons
                 if (this.type === 'radio') {
-                    if (processedRadioNames[name]) {
-                        return; // already handled this radio group
-                    }
-                    var checkedRadio = $('input[name="' + name + '"]:checked', '#clientReviewForm');
+                    if (processedRadioNames[name]) return;
+                    const checkedRadio = $(`input[name="${name}"]:checked`, '#clientReviewForm');
                     if (checkedRadio.length) {
-                        val = checkedRadio.val();
-                        val = escapeXml(val);
-                        xml += '<' + name + '>' + val + '</' + name + '>';
+                        val = escapeXml(checkedRadio.val());
+                        xml += `<${name}>${val}</${name}>`;
                     }
                     processedRadioNames[name] = true;
                 } else {
-                    val = this.value || '';
-                    val = escapeXml(val);
-                    xml += '<' + name + '>' + val + '</' + name + '>';
+                    val = escapeXml(this.value || '');
+                    xml += `<${name}>${val}</${name}>`;
                 }
             });
+
+            // Recipients grouped in <Recipients>
+            xml += '<recipients>';
+            $('#recipientContainer .recipientRow').each(function () {
+                const name = escapeXml($(this).find('input[name="recipientReceivingName"]').val() || '');
+                const title = escapeXml($(this).find('input[name="recipientReceivingTitle"]').val() || '');
+                const email = escapeXml($(this).find('input[name="recipientReceivingEmail"]').val() || '');
+
+                xml += `
+            <recipient>
+                <recipientReceivingName>${name}</recipientReceivingName>
+                <recipientReceivingTitle>${title}</recipientReceivingTitle>
+                <recipientReceivingEmail>${email}</recipientReceivingEmail>
+            </recipient>
+        `;
+            });
+            xml += '</recipients>';
 
             xml += '</ClientReview>';
             return xml;
         }
 
-        // Utility function to escape XML special characters
         function escapeXml(str) {
-            return str.replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&apos;");
+            return String(str || '').replace(/[<>&'"]/g, function (c) {
+                return {
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '&': '&amp;',
+                    '\'': '&apos;',
+                    '"': '&quot;'
+                }[c];
+            });
         }
 
 
+
         function submitForm(event) {
-            if (event) event.preventDefault(); // Stops page reload
+            if (event) event.preventDefault();
             if (!validateRequiredFields()) {
                 Swal.fire({
                     title: '⚠️ Missing Information',
@@ -2171,54 +2351,60 @@
 
 
         function generatePdf() {
-            // Clone the full document
             var $clonedDoc = $(document.documentElement).clone();
 
-            // Remove the classes 'form-container' and 'border-10'
             $clonedDoc.find('.form-container.border-10').removeClass('form-container border-10');
-
-            // Remove elements not needed in PDF (e.g. buttons section)
             $clonedDoc.find('.pdf-exclude').remove();
 
-            // Copy form values from original to cloned
+            // --- Handle recipient rows individually ---
+            const $originalRows = $('#recipientContainer .recipientRow');
+            const $clonedContainer = $clonedDoc.find('#recipientContainer');
+            $clonedContainer.empty(); // clear existing
+
+            $originalRows.each(function (index) {
+                const $originalRow = $(this);
+                const $clonedRow = $originalRow.clone();
+
+                // Remove buttons from PDF
+                $clonedRow.find('.recipientButtons').remove();
+
+                // Set input values explicitly
+                ['recipientReceivingName', 'recipientReceivingTitle', 'recipientReceivingEmail'].forEach(field => {
+                    const value = $originalRow.find(`input[name="${field}"]`).val();
+                    $clonedRow.find(`input[name="${field}"]`).val(value).attr('value', value);
+                });
+
+                // Remove labels from all but the first row
+                if (index > 0) {
+                    $clonedRow.find('label').remove();
+                }
+
+                $clonedContainer.append($clonedRow);
+            });
+
+            // --- Handle other form fields ---
             $('input, textarea, select').each(function () {
                 const $original = $(this);
                 const name = $original.attr('name') || $original.attr('id');
-                if (!name) return;
+                if (!name || ['recipientReceivingName', 'recipientReceivingTitle', 'recipientReceivingEmail'].includes(name)) return;
 
                 const type = $original.attr('type');
                 const value = $original.val();
+                const $clonedElements = $clonedDoc.find(`[name="${name}"], #${name}`);
 
-                // Find matching element(s) in the cloned DOM
-                const $clonedElement = $clonedDoc.find(`[name="${name}"], [id="${name}"]`);
-
-                if ($original.is('textarea') || type === 'text' || type === 'number' || type === 'date'  || type === 'email') {
-                    $clonedElement.val(value);
-                    $clonedElement.attr('value', value); // ensure it's reflected in HTML
-                }
-
-                else if (type === 'radio') {
-                    // Only set checked for matching value
+                if ($original.is('textarea') || type === 'text' || type === 'number' || type === 'date' || type === 'email') {
+                    $clonedElements.val(value).attr('value', value);
+                } else if (type === 'radio') {
                     if ($original.is(':checked')) {
-                        $clonedDoc
-                            .find(`input[type="radio"][name="${name}"][value="${value}"]`)
-                            .prop('checked', true)
-                            .attr('checked', 'checked');
+                        $clonedDoc.find(`input[type="radio"][name="${name}"][value="${value}"]`).prop('checked', true).attr('checked', 'checked');
                     }
-                }
-
-                else if (type === 'checkbox') {
-                    const isChecked = $original.is(':checked');
-                    $clonedElement.prop('checked', isChecked);
-                    if (isChecked) {
-                        $clonedElement.attr('checked', 'checked');
-                    } else {
-                        $clonedElement.removeAttr('checked');
-                    }
-                }
-
-                else if ($original.is('select')) {
-                    $clonedElement.find('option').each(function () {
+                } else if (type === 'checkbox') {
+                    const checked = $original.is(':checked');
+                    $clonedElements.prop('checked', checked);
+                    if (checked) $clonedElements.attr('checked', 'checked');
+                    else $clonedElements.removeAttr('checked');
+                } else if ($original.is('select')) {
+                    $clonedElements.find('option').each(function () {
                         if ($(this).val() === value) {
                             $(this).attr('selected', 'selected');
                         } else {
@@ -2229,23 +2415,19 @@
             });
 
             adjustDynamicFieldHeights($clonedDoc);
-           
 
-
-            // Convert all relative paths (href/src) to absolute URLs
             $clonedDoc.find('link[href], script[src], img[src]').each(function () {
-                var $el = $(this);
-                var attr = this.tagName === 'LINK' || this.tagName === 'A' ? 'href' : 'src';
-                var val = $el.attr(attr);
+                const $el = $(this);
+                const attr = this.tagName === 'LINK' || this.tagName === 'A' ? 'href' : 'src';
+                const val = $el.attr(attr);
                 if (val && !val.startsWith('http') && !val.startsWith('data:')) {
-                    var absoluteUrl = new URL(val, window.location.origin).href;
+                    const absoluteUrl = new URL(val, window.location.origin).href;
                     $el.attr(attr, absoluteUrl);
                 }
             });
 
             $clonedDoc.find('head').append(`
               <style>
-                /* Radio */
                 input[type="radio"] {
                   appearance: none;
                   -webkit-appearance: none;
@@ -2269,8 +2451,6 @@
                   top: 2px;
                   left: 2px;
                 }
-
-                /* Select */
                 select {
                   -webkit-appearance: none;
                   appearance: none;
@@ -2281,13 +2461,11 @@
                   font-family: Calibri, sans-serif;
                   font-size: 14px;
                   width: auto;
-                  min-width: auto;
                   background-image: url('data:image/svg+xml;utf8,<svg fill="%23000" height="12" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
                   background-repeat: no-repeat;
                   background-position: right 10px center;
                   background-size: 12px;
                 }
-
                 label.radio-label, label.checkbox-label {
                   display: inline-flex;
                   align-items: center;
@@ -2298,37 +2476,15 @@
               </style>
             `);
 
-
-            $('input[type="radio"]').each(function () {
-                const $input = $(this);
-                const name = $input.attr('name');
-                const val = $input.val();
-
-                if (!name || typeof val === 'undefined') return;
-
-                const $clonedInput = $clonedDoc.find(`input[type="${$input.attr('type')}"][name="${name}"][value="${val}"]`);
-
-                if ($input.is(':checked')) {
-                    $clonedInput.prop('checked', true);
-                    $clonedInput.attr('checked', 'checked');
-                } else {
-                    $clonedInput.prop('checked', false);
-                    $clonedInput.removeAttr('checked');
-                }
-            });
-
-
-            // Remove all <script> tags
             $clonedDoc.find('script').remove();
 
-            // Final HTML string to send to server
-            var fullHtml = '<!DOCTYPE html>\n' + $('<div>').append($clonedDoc).html();
-            return fullHtml
+            const fullHtml = '<!DOCTYPE html>\n' + $('<div>').append($clonedDoc).html();
+            return fullHtml;
         }
 
         function generatepdfBtnClick() {
 
-            if (event) event.preventDefault(); // Stops page reload
+            if (event) event.preventDefault();
             if (!validateRequiredFields()) {
                 Swal.fire({
                     title: '⚠️ Missing Information',
@@ -2414,41 +2570,37 @@
                 $meetingDate.removeClass('field-error');
             }
 
-            // RECIPIENT RECEIVEING NAME - Input
-            const $recipientReceivingName = $('#recipientReceivingName');
-            if (!$recipientReceivingName.val().trim()) {
-                $('#rfvRecipientReceivingName').show();
-                $recipientReceivingName.addClass('field-error');
-                isValid = false;
-            } else {
-                $('#rfvRecipientReceivingName').hide();
-                $recipientReceivingName.removeClass('field-error');
-            }
+            // RECIPIENT ROWS VALIDATION
+            $('#recipientContainer .recipientRow').each(function () {
+                const $name = $(this).find('input[name="recipientReceivingName"]');
+                const $title = $(this).find('input[name="recipientReceivingTitle"]');
+                const $email = $(this).find('input[name="recipientReceivingEmail"]');
 
-            // RECIPIENT RECEIVEING TITLE - Input
-            const $recipientReceivingTitle = $('#recipientReceivingTitle');
-            if (!$recipientReceivingTitle.val().trim()) {
-                $('#rfvRecipientReceivingTitle').show();
-                $recipientReceivingTitle.addClass('field-error');
-                isValid = false;
-            } else {
-                $('#rfvRecipientReceivingTitle').hide();
-                $recipientReceivingTitle.removeClass('field-error');
-            }
+                const $inputs = $([$name[0], $title[0], $email[0]]);
+                clearFieldErrors($inputs);
 
-            // RECIPIENT RECEIVEING EMAIL - Input
-            const $recipientReceivingEmail = $('#recipientReceivingEmail');
-            if (!$recipientReceivingEmail.val().trim()) {
-                $('#rfvRecipientReceivingEmail').show();
-                $recipientReceivingEmail.addClass('field-error');
-                isValid = false;
-            } else {
-                $('#rfvRecipientReceivingEmail').hide();
-                $recipientReceivingEmail.removeClass('field-error');
-            }
+                // Check if all fields are empty (treat as invalid row)
+                const allEmpty = !$name.val().trim() && !$title.val().trim() && !$email.val().trim();
+
+                if (allEmpty) {
+                    $inputs.each(function () {
+                        $(this).addClass('field-error');
+                        $(this).siblings('span').show();
+                    });
+                    isValid = false;
+                }
+            });
+
             return isValid;
         }
 
+
+        function clearFieldErrors($inputs) {
+            $inputs.each(function () {
+                $(this).removeClass('field-error');
+                $(this).siblings('span').hide();
+            });
+        }
 
     </script>
 </body>
