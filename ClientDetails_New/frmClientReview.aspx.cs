@@ -1,9 +1,11 @@
 ﻿using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
@@ -24,6 +26,7 @@ using System.Web.Services.Description;
 using System.Web.UI.WebControls;
 using System.Xml;
 using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
+using static System.Net.WebRequestMethods;
 
 namespace ClientDetails
 {
@@ -35,6 +38,15 @@ namespace ClientDetails
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (Request.QueryString["handler"] == "upload" && Request.HttpMethod == "POST")
+            {
+                UploadFiles(); // your method
+                Response.ContentType = "application/json";
+                Response.Write("{\"status\":\"success\"}");
+                Response.End(); //Important: stop further execution
+                return;
+            }
+
             if (!IsPostBack)
             {
                 string token, reviewId, responder, requestType;
@@ -138,6 +150,233 @@ namespace ClientDetails
 
   
             }
+        }
+
+        private async Task UploadFiles()
+        {
+            HttpPostedFile excelFile = Request.Files["excelFile"];
+            HttpPostedFile anyFile = Request.Files["anyFile"];
+            string dateFolder = DateTime.Now.ToString("MM-dd-yyyy");
+            string guidFolder = Guid.NewGuid().ToString();
+            string uploadPath = Path.Combine(Server.MapPath("~/Uploads/"), dateFolder, guidFolder);
+            string excelFilePath = "", anyFilePath = "";
+
+            if (!Directory.Exists(uploadPath))
+            {
+                Directory.CreateDirectory(uploadPath);
+            }
+
+            if (excelFile != null && excelFile.ContentLength > 0)
+            {
+                string fileName = Path.GetFileName(excelFile.FileName); // original name
+                excelFilePath = Path.Combine(uploadPath, fileName);
+                excelFile.SaveAs(excelFilePath);
+            }
+
+            if (anyFile != null && anyFile.ContentLength > 0)
+            {
+                string fileName = Path.GetFileName(anyFile.FileName);
+                anyFilePath = Path.Combine(uploadPath, fileName);
+                anyFile.SaveAs(anyFilePath);
+            }
+           
+            Dictionary<string, List<List<string>>> crfExcelData = ReadClientReviewFormExcel(excelFilePath);
+            string accountNumbers = string.Join(",", crfExcelData.Keys);
+            List<JObject> zohoAccountsData = await GetZohoAccountsData(accountNumbers);
+
+            if (zohoAccountsData.Any())
+            {
+                var accountDict = zohoAccountsData
+                    .Where(obj => obj["Account_Number"] != null)
+                    .ToDictionary(
+                        obj => obj["Account_Number"].ToString(),
+                        obj => new Dictionary<string, List<string>>
+                        {
+                            ["Mailing"] = new List<string>
+                            {
+                                obj["Mailing_Street"]?.ToString().ToUpper() ?? "",
+                                obj["Mailing_City"]?.ToString().ToUpper() ?? "",
+                                obj["Mailing_State"]?.ToString().ToUpper() ?? "",
+                                obj["Mailing_Zip"]?.ToString() ?? ""
+                            },
+                            ["Zoho_Account_Details"] = new List<string>
+                            {
+                                obj["id"]?.ToString() ?? "",
+                                obj["Account_Name"]?.ToString().ToUpper() ?? "",
+                                obj["Account_Number"]?.ToString() ?? ""
+                            }
+                        }
+                    );
+
+                List<List<string>> EsoAccountsData = new List<List<string>>();
+                EsoAccountsData = GetClientInfoList(accountNumbers);
+                if (EsoAccountsData.Count > 0)
+                {
+                    foreach (var zohoObj in zohoAccountsData)
+                    {
+                        // Get Account_Number from the Zoho record
+                        var accountNumber = zohoObj["Account_Number"]?.ToString();
+
+                        if (string.IsNullOrEmpty(accountNumber))
+                            continue;
+
+                        var match = EsoAccountsData.FirstOrDefault(row => row.Count > 0 && row[0] == accountNumber);
+
+                        if (match != null)
+                        {
+                            var accountDetailList = match.Skip(1).ToList();
+
+                            zohoObj["Medicount_Account_Details"] = JArray.FromObject(accountDetailList);
+                        }
+                    }
+
+                }
+                else
+                {
+                    Console.WriteLine("No Data in ESO or Customer Portal");
+                }
+
+
+
+            }
+            else
+            {
+                Console.WriteLine("No Data in zoho");
+            }
+
+        }
+        public Dictionary<string, List<List<string>>> ReadClientReviewFormExcel(string filePath)
+        {
+            //{Client#:[[Client Name, Account Executive, Title, Email]] }
+            var result = new Dictionary<string, List<List<string>>>();
+
+            using (SpreadsheetDocument document = SpreadsheetDocument.Open(filePath, false))
+            {
+                WorkbookPart workbookPart = document.WorkbookPart;
+                Sheet sheet = workbookPart.Workbook.Sheets.Elements<Sheet>().FirstOrDefault();
+                if (sheet == null) return result;
+
+                WorksheetPart worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
+                SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
+                if (sheetData == null) return result;
+
+                SharedStringTablePart sharedStringPart = workbookPart.SharedStringTablePart;
+
+                // Skip header (assumes first row is header)
+                foreach (Row row in sheetData.Elements<Row>().Skip(1))
+                {
+                    var cells = row.Elements<Cell>().ToList();
+                    if (cells.Count < 4) continue;
+
+                    string groupKey = GetCellValue(cells[0], sharedStringPart); // Client#
+                    if (string.IsNullOrWhiteSpace(groupKey)) continue;
+
+                    var entry = new List<string>
+                    {
+                        GetCellValue(cells[1], sharedStringPart), // Client Name
+                        GetCellValue(cells[2], sharedStringPart), // Account Executive
+                        GetCellValue(cells[3], sharedStringPart), // Title
+                        GetCellValue(cells[4], sharedStringPart)  // Email
+                    };
+
+                    if (!result.ContainsKey(groupKey))
+                        result[groupKey] = new List<List<string>>();
+
+                    result[groupKey].Add(entry);
+                }
+            }
+
+            return result;
+        }
+
+        private string GetCellValue(Cell cell, SharedStringTablePart stringTablePart)
+        {
+            if (cell == null || cell.CellValue == null)
+                return string.Empty;
+
+            string value = cell.CellValue.InnerText;
+
+            if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
+            {
+                if (int.TryParse(value, out int index) && stringTablePart != null)
+                {
+                    var sharedStringItem = stringTablePart.SharedStringTable.Elements<SharedStringItem>().ElementAtOrDefault(index);
+                    return sharedStringItem?.InnerText ?? "";
+                }
+            }
+
+            return value;
+        }
+
+        private static async Task<List<JObject>> GetZohoAccountsData(string accountNumbers)
+        {
+            int page = 1;
+            const int perPage = 200;
+            var allAccounts = new List<JObject>();
+            FrmClientZohoApiCredentials ZohoCred = new FrmClientZohoApiCredentials();
+
+            ZohoCred.ClientId = ConfigurationManager.AppSettings["ZohoClientId"].ToString();
+            ZohoCred.ClientSecret = ConfigurationManager.AppSettings["ZohoClientSecret"].ToString();
+            ZohoCred.RefreshToken = ConfigurationManager.AppSettings["ZohoRefreshToken"].ToString();
+            string accessToken = GetAccessTokenFromRefreshToken(ZohoCred);
+
+            while (true)
+            {
+                string url = $"https://www.zohoapis.com/crm/v8/Accounts/search?criteria=(Account_Number:in:{accountNumbers})&fields=id,Account_Name,Account_Number,Mailing_Street,Mailing_City,Mailing_State,Mailing_Zip&page={page}&per_page={perPage}";
+                string response = MakeZohoApiRequest("GET", url, accessToken);
+
+                if (string.IsNullOrEmpty(response))
+                    break;
+
+                var jsonObj = JObject.Parse(response);
+                var dataArray = jsonObj["data"]?.ToObject<List<JObject>>();
+
+                if (dataArray == null || dataArray.Count == 0)
+                    break; // No more records
+
+                allAccounts.AddRange(dataArray);
+
+                // If less than perPage, it's the last page
+                if (dataArray.Count < perPage)
+                    break;
+
+                page++; // Go to next page
+            }
+
+            return allAccounts;
+        }
+
+        public List<List<string>> GetClientInfoList(string clientIds)
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["EsoToZohoConnectionString"].ToString();
+            var results = new List<List<string>>();
+
+            using (var conn = new SqlConnection(connectionString))
+            using (var cmd = new SqlCommand("spCRF_GetClientInfoUsingClientIDs", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@ClientIds", clientIds);
+
+                conn.Open();
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var row = new List<string>();
+
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            string value = reader.IsDBNull(i) ? null : reader.GetValue(i).ToString();
+                            row.Add(value);
+                        }
+
+                        results.Add(row);
+                    }
+                }
+            }
+
+            return results;
         }
 
         private void ShowErrorMessage(string message)
@@ -301,7 +540,7 @@ namespace ClientDetails
                         {
                             result["ClientName"] = rdr["CompanyName"]?.ToString().ToUpper() ?? "";
                             result["AccountExecutive"] = rdr["AccountExecutive"]?.ToString().ToUpper() ?? "";
-                            result["Email"] = rdr["AccountExecutiveEmailID"]?.ToString().ToUpper() ?? "";
+                            result["Email"] = rdr["AccountExecutiveEmailID"]?.ToString() ?? "";
                             result["Phone"] = rdr["AccountExecutivePhone"]?.ToString().ToUpper() ?? "";
                             result["RenewalDate"] = rdr["RenewalDate"] != DBNull.Value ? Convert.ToDateTime(rdr["RenewalDate"]).ToString("MM/dd/yyyy") : "";
                             result["FeeRate"] = rdr["FeeRate"] != DBNull.Value ? $"{Convert.ToDecimal(rdr["FeeRate"]):F2} %" : "0.00 %";
@@ -352,7 +591,7 @@ namespace ClientDetails
                                 {
                                     result["currentChiefName"] = $"{ContactData["First_Name"]?.ToString().ToUpper()} {ContactData["Last_Name"]?.ToString().ToUpper()}";
                                     result["newChiefName"] = $"{ContactData["First_Name"]?.ToString().ToUpper()} {ContactData["Last_Name"]?.ToString().ToUpper()}";
-                                    result["newChiefEmail"] = ContactData["Email"]?.ToString().ToUpper();
+                                    result["newChiefEmail"] = ContactData["Email"]?.ToString();
                                     result["newChiefPhone"] = ContactData["Phone"]?.ToString().ToUpper();
                                 }
 
@@ -361,7 +600,7 @@ namespace ClientDetails
                                 {
                                     result["currentFiscalOfficer"] = $"{ContactData["First_Name"]?.ToString().ToUpper()} {ContactData["Last_Name"]?.ToString().ToUpper()}";
                                     result["newFiscalName"] = $"{ContactData["First_Name"]?.ToString().ToUpper()} {ContactData["Last_Name"]?.ToString().ToUpper()}";
-                                    result["newFiscalEmail"] = ContactData["Email"]?.ToString().ToUpper();
+                                    result["newFiscalEmail"] = ContactData["Email"]?.ToString();
                                     result["newFiscalPhone"] = ContactData["Phone"]?.ToString().ToUpper();
                                 }
 
@@ -371,7 +610,7 @@ namespace ClientDetails
                                     {
                                         $"{ContactData["First_Name"]?.ToString().ToUpper()} {ContactData["Last_Name"]?.ToString().ToUpper()}",
                                         $"{ContactData["First_Name"]?.ToString().ToUpper()} {ContactData["Last_Name"]?.ToString().ToUpper()}",
-                                        ContactData["Email"]?.ToString().ToUpper(),
+                                        ContactData["Email"]?.ToString(),
                                         ContactData["Phone"]?.ToString().ToUpper(),
                                     };
                                     i++;
@@ -408,15 +647,12 @@ namespace ClientDetails
                     result["MailZip"] = contact["Mailing_Zip"]?.ToString().ToUpper() ?? "";
                     result["zohoAccountId"] = contact["id"]?.ToString().ToUpper() ?? "";
 
-                    // You can continue adding Chief, Fiscal, and Authorized Officials as needed
                 }
             }
 
             return result;
         }
 
-
-        
 
         [WebMethod]
         public static Dictionary<string, string> GetClientReviewData(string companyID, string startDate, string endDate)
@@ -595,11 +831,11 @@ namespace ClientDetails
                                 }
                                 finally
                                 {
-                                    if (!string.IsNullOrEmpty(htmlPath) && File.Exists(htmlPath))
-                                        File.Delete(htmlPath);
+                                    if (!string.IsNullOrEmpty(htmlPath) && System.IO.File.Exists(htmlPath))
+                                        System.IO.File.Delete(htmlPath);
 
-                                    if (!string.IsNullOrEmpty(pdfPath) && File.Exists(pdfPath))
-                                        File.Delete(pdfPath);
+                                    if (!string.IsNullOrEmpty(pdfPath) && System.IO.File.Exists(pdfPath))
+                                        System.IO.File.Delete(pdfPath);
                                 }
                             }
                         }
@@ -651,11 +887,11 @@ namespace ClientDetails
             }
             finally
             {
-                if (!string.IsNullOrEmpty(htmlPath) && File.Exists(htmlPath))
-                    File.Delete(htmlPath);
+                if (!string.IsNullOrEmpty(htmlPath) && System.IO.File.Exists(htmlPath))
+                    System.IO.File.Delete(htmlPath);
 
-                if (!string.IsNullOrEmpty(pdfPath) && File.Exists(pdfPath))
-                    File.Delete(pdfPath);
+                if (!string.IsNullOrEmpty(pdfPath) && System.IO.File.Exists(pdfPath))
+                    System.IO.File.Delete(pdfPath);
             }
         }
 
@@ -731,7 +967,7 @@ namespace ClientDetails
 
             string fileName = "ClientReviewForm_" + Guid.NewGuid() + ".html";
             string path = Path.Combine(folder, fileName);
-            File.WriteAllText(path, html, Encoding.UTF8);
+            System.IO.File.WriteAllText(path, html, Encoding.UTF8);
             return path;
         }
 
@@ -761,7 +997,7 @@ namespace ClientDetails
                     throw new Exception("wkhtmltopdf failed: " + err);
             }
 
-            return File.ReadAllBytes(outputPdf);
+            return System.IO.File.ReadAllBytes(outputPdf);
         }
 
         public static string CleanedVersionOfValues(object value, bool removeDecimal = true, string type = "AMOUNT")
@@ -854,7 +1090,7 @@ namespace ClientDetails
                 request.Method = method;
                 request.Headers.Add("Authorization", $"Zoho-oauthtoken {accessToken}");
 
-                if (filePath != null && File.Exists(filePath))
+                if (filePath != null && System.IO.File.Exists(filePath))
                 {
                     // --- File upload logic ---
                     string boundary = "---------------------------" + DateTime.Now.Ticks.ToString("x");
@@ -874,7 +1110,7 @@ namespace ClientDetails
                         byte[] fileHeaderBytes = Encoding.UTF8.GetBytes(fileHeader);
                         requestStream.Write(fileHeaderBytes, 0, fileHeaderBytes.Length);
 
-                        byte[] fileData = File.ReadAllBytes(filePath);
+                        byte[] fileData = System.IO.File.ReadAllBytes(filePath);
                         requestStream.Write(fileData, 0, fileData.Length);
 
                         // Optionally, add JSON payload or other form parts
