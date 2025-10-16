@@ -953,7 +953,7 @@ public partial class ZohoCrmWebhookReceiver : System.Web.UI.Page
                         <!-- Instruction -->
                         <tr>
                           <td style=""padding: 10px;"">
-                            <p style=""font-weight: bold; margin: 0 0 10px;"">PLEASE REVIEW THE FOLLOWING CUSTOMER ACTION:</p>
+                            <p style=""font-weight: bold; margin: 0 0 10px;"">PLEASE REVIEW THE FOLLOWING CHANGES:</p>
                             {finalChangesTable}
                             {finalAddressTable}
                           </td>

@@ -1024,7 +1024,7 @@ public partial class CcmsToZohoCrm : System.Web.UI.Page
                         <tr>
                           <td style=""padding: 10px;"">
                             {warningContent}
-                            <p style=""font-weight: bold; margin: 0 0 10px;"">PLEASE REVIEW THE FOLLOWING CUSTOMER ACTION:</p>
+                            <p style=""font-weight: bold; margin: 0 0 10px;"">PLEASE REVIEW THE FOLLOWING CHANGES:</p>
                             {finalChangesTable}
                             
                           </td>
