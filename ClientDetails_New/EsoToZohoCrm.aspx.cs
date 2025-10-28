@@ -5,6 +5,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using iText.Commons.Utils;
 using iText.Html2pdf.Attach;
+using Microsoft.SqlServer.Server;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -41,7 +42,7 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
     private static readonly byte[] Key = Encoding.ASCII.GetBytes("Medicount-32-byte-long-key!!1234"); // 32 chars = 256-bit
     private static readonly byte[] IV = Encoding.ASCII.GetBytes("Medicount-pass-b"); // 16 chars = 128-bit
 
-    readonly Dictionary<string, (string ZohoKey, string CcmsKey)> fieldMappings = new Dictionary<string, (string ZohoKey, string CcmsKey)>
+    public static readonly Dictionary<string, (string ZohoKey, string CcmsKey)> fieldMappings = new Dictionary<string, (string ZohoKey, string CcmsKey)>
                                                                         {
                                                                             //{<"Title Name">, (<"Zoho Data">, <"ESO Data">) }
                                                                             { "BLS Rate", ("zoho_BLS_Rate", "eso_BlsRate") },
@@ -52,6 +53,7 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
                                                                             { "Non ER ALS Rate", ("zoho_Non_ER_ALS_Rate", "eso_AlsNE") },
                                                                             { "Non ER Mileage", ("zoho_Non_ER_Mileage", "eso_MileageNE") },
                                                                             { "SCT", ("zoho_SCT", "eso_Sct") },
+                                                                            { "Non Transport Charge", ("zoho_Non_Transport_Charge", "eso_Tnt") },
                                                                             { "Insu Pay to Street", ("zoho_Insu_Pay_to_Street", "eso_InsPayToAddress") },
                                                                             { "Insu Pay to City", ("zoho_Insu_Pay_to_City", "eso_InsPayToCity") },
                                                                             { "Insu Pay to State", ("zoho_Insu_Pay_to_State", "eso_InsPayToState") },
@@ -156,7 +158,7 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
                 }
                 else // method = POST
                 {
-
+                    bool isApprovalEmail = true;
                     string jsonPayload;
                     using (StreamReader reader = new StreamReader(Request.InputStream))
                     {
@@ -165,6 +167,10 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
 
                     JObject payload = JObject.Parse(jsonPayload);
                     string RequestType = "";
+                    string toRecipients = "";
+                    string ccRecipients = "";
+                    string bccRecipients = "";
+                    string accOwnerEmail = "";
 
                     EsoCompulsoryFields comFields = new EsoCompulsoryFields();
                     comFields.Id = payload["CompanyId"]?.Value<int>() ?? 0;  // Default to 0 if null
@@ -173,15 +179,8 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
                     comFields.AccountName = payload["CompanyName"]?.ToString();
                     comFields.RequestedBy = payload["RequestedBy"]?.ToString();
                     RequestType = payload["RequestType"]?.ToString();
-
-                    List<string> ccmails = payload["AccountOwnerEmail"]?
-                     .ToString()
-                     .Split(';')
-                     .Where(email => !string.IsNullOrWhiteSpace(email))  // Filters out empty or whitespace-only strings
-                     .Select(email => email.Trim())  // Trims leading/trailing whitespace from each email
-                     .ToList();
-
                     string Category = payload["Category"]?.ToString();
+                    accOwnerEmail = payload["AccountOwnerEmail"]?.ToString();
 
                     // 4. Define keys to exclude from email
                     var excludedKeys = new HashSet<string> { "CompanyId", "CompanyName", "RequestedBy", "ZohoCrmId", "RequestType" };
@@ -191,10 +190,28 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
                         .Properties()
                         .Where(p => !excludedKeys.Contains(p.Name))
                         .ToDictionary(p => p.Name, p => p.Value?.ToString());
+       
+                    var emailResults = GetEmailApprovers(connectionString, Category, isApprovalEmail);
 
-                    //********************************** TO DELETE BELOW LINE FOR LIVE************************
-                    //DirectUpdateToZohoCRM(ZohoCred, changedFields, recordId);
-                    SendEmailApproval(changedFields, comFields, RequestType, ccmails, Category); // Uncomment this line in live(**Mail approval function**)
+                    // Add To emails
+                    if (!string.IsNullOrEmpty(emailResults.toMails))
+                    {
+                        toRecipients += string.IsNullOrEmpty(toRecipients) ? emailResults.toMails : ";" + emailResults.toMails;
+                    }
+
+                    // Add CC emails (including the pre-existing value from payload)
+                    if (!string.IsNullOrEmpty(emailResults.ccMails))
+                    {
+                        ccRecipients += string.IsNullOrEmpty(ccRecipients) ? emailResults.ccMails : ";" + emailResults.ccMails;
+                    }
+
+                    // Add BCC emails
+                    if (!string.IsNullOrEmpty(emailResults.bccMails))
+                    {
+                        bccRecipients += string.IsNullOrEmpty(bccRecipients) ? emailResults.bccMails : ";" + emailResults.bccMails;
+                    }
+
+                    SendEmailApproval(changedFields, comFields, accOwnerEmail, RequestType, isApprovalEmail, toRecipients, ccRecipients, bccRecipients);
                     Response.StatusCode = 200;
                     Response.Write($"Success: Email Sent Successfully");
 
@@ -270,7 +287,8 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
                     else if (confirmed == "true")
                     {
                         Dictionary<string, string> changedFields = new Dictionary<string, string>();
-                        string CreatedBy = "", ModifiedBy = "", AccountName = "", AccountId = "", ZohoRecordId = "", recordId = "", ZohoStatus = "", AccountType="";
+                        string CreatedBy = "", ModifiedBy = "", AccountName = "", AccountId = "", ZohoRecordId = "", recordId = "", ZohoStatus = "", AccountType="", accOwnerEmail = "";
+                        bool isApprovalEmail = false;
                     
                         using (SqlConnection conn = new SqlConnection(connectionString))
                         {
@@ -283,15 +301,12 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
 
                             using (SqlDataReader reader = cmd.ExecuteReader())
                             {
-
-
                                 if (reader.Read())
                                 {
                                     preEmailStatus = reader["EmailStatus"]?.ToString();
                                     preResponder = reader["Responder"]?.ToString();
                                     modifiedOn = reader["ModifiedOn"]?.ToString();
                                     isFirstApproval = preEmailStatus == "PENDING" || preEmailStatus == "PARTIAL SUCCESS";
-
                                 }
                             }
                         }
@@ -311,8 +326,6 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
 
                                 using (SqlDataReader reader = cmd.ExecuteReader())
                                 {
-
-
                                     if (reader.Read())
                                     {
                                         // Ensure all address objects are initialized
@@ -329,12 +342,43 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
                                         AccountId = reader["AccountId"]?.ToString();
                                         ZohoRecordId = reader["ZohoCrmRecordId"]?.ToString();
                                         AccountType = reader["AccountType"]?.ToString();
-
-
+                                        accOwnerEmail = reader["AccountOwnerEmail"]?.ToString();
                                     }
                                 }
                             }
 
+                            // Data for confirmation mail
+                            EsoCompulsoryFields comFields = new EsoCompulsoryFields();
+                            comFields.Id = int.TryParse(recordId, out var result) ? result : 0; // Default to 0 if null
+                            comFields.CompanyId = int.TryParse(AccountId, out var result1) ? result1 : 0;
+                            comFields.ZohoCrmId = ZohoRecordId;
+                            comFields.AccountName = AccountName;
+                            comFields.RequestedBy = responder;
+                            string Category = changedFields.ContainsKey("Category") ? changedFields["Category"].ToUpper() : "";
+                            string toRecipients = "";
+                            string ccRecipients = "";
+                            string bccRecipients = "";
+                            ccRecipients = accOwnerEmail;
+
+                            var emailResults = GetEmailApprovers(connectionString, Category, isApprovalEmail);
+
+                            // Add To emails
+                            if (!string.IsNullOrEmpty(emailResults.toMails))
+                            {
+                                toRecipients += string.IsNullOrEmpty(toRecipients) ? emailResults.toMails : ";" + emailResults.toMails;
+                            }
+
+                            // Add CC emails (including the pre-existing value from payload)
+                            if (!string.IsNullOrEmpty(emailResults.ccMails))
+                            {
+                                ccRecipients += string.IsNullOrEmpty(ccRecipients) ? emailResults.ccMails : ";" + emailResults.ccMails;
+                            }
+
+                            // Add BCC emails
+                            if (!string.IsNullOrEmpty(emailResults.bccMails))
+                            {
+                                bccRecipients += string.IsNullOrEmpty(bccRecipients) ? emailResults.bccMails : ";" + emailResults.bccMails;
+                            }
 
                             if (decision == "approve")
                             {
@@ -399,6 +443,8 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
                                             string updateJson = JsonConvert.SerializeObject(updateData);
                                             MakeZohoApiRequest("PUT", updateUrl, accessToken, updateJson);
                                             UpdateZohoStatusById(connectionString, recordId, "SUCCESS");
+                                            SendEmailApproval(changedFields, comFields, accOwnerEmail, requestType, isApprovalEmail, toRecipients, ccRecipients, bccRecipients, decision, "SUCCESS");
+
                                         }
                                         else
                                         {
@@ -426,16 +472,19 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
                                                         string updateJson = JsonConvert.SerializeObject(updateData);
                                                         MakeZohoApiRequest("PUT", updateUrl, accessToken, updateJson);
                                                         UpdateZohoStatusById(connectionString, recordId, "SUCCESS");
+                                                        SendEmailApproval(changedFields, comFields, accOwnerEmail, requestType, isApprovalEmail, toRecipients, ccRecipients, bccRecipients, decision, "SUCCESS");
                                                     }
                                                     else
                                                     {
                                                         UpdateZohoStatusById(connectionString, recordId, accountType);
+                                                        SendEmailApproval(changedFields, comFields, accOwnerEmail,requestType, isApprovalEmail, toRecipients, ccRecipients, bccRecipients, decision, accountType);
                                                     }
 
                                                 }
                                                 else
                                                 {
                                                     UpdateZohoStatusById(connectionString, recordId, "ERROR");
+                                                    SendEmailApproval(changedFields, comFields, accOwnerEmail, requestType, isApprovalEmail, toRecipients, ccRecipients, bccRecipients, decision, "ERROR");
                                                 }
                                             }
                                             else
@@ -457,18 +506,21 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
                                                 string updateJson = JsonConvert.SerializeObject(updateData);
                                                 MakeZohoApiRequest("POST", updateUrl, accessToken, updateJson);
                                                 UpdateZohoStatusById(connectionString, recordId, "SUCCESS");
+                                                SendEmailApproval(changedFields, comFields, accOwnerEmail, requestType, isApprovalEmail, toRecipients, ccRecipients, bccRecipients, decision, "SUCCESS");
                                             }
                                         }
                                     }
                                     catch (Exception ex)
                                     {
                                         UpdateZohoStatusById(connectionString, recordId, "FAILED");
+                                        SendEmailApproval(changedFields, comFields, accOwnerEmail, requestType, isApprovalEmail, toRecipients, ccRecipients, bccRecipients, decision, "FAILED");
                                         Console.WriteLine(ex);
                                     }
                                 }
                                 else
                                 {
                                     UpdateZohoStatusById(connectionString, recordId, "ZOHO CRM ACCESS TOKEN ERROR");
+                                    SendEmailApproval(changedFields, comFields, accOwnerEmail, requestType, isApprovalEmail, toRecipients, ccRecipients, bccRecipients, decision, "ZOHO CRM ACCESS TOKEN ERROR");
                                     Console.WriteLine("Zoho CRM Access Token Error");
                                 }
                                 
@@ -476,6 +528,7 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
                             else
                             {
                                 UpdateZohoStatusById(connectionString, recordId, "REJECTED");
+                                SendEmailApproval(changedFields, comFields, accOwnerEmail, requestType, isApprovalEmail, toRecipients, ccRecipients, bccRecipients, decision, "REJECTED");
                                 Console.WriteLine("Rejected");
                             }
 
@@ -757,7 +810,473 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
         }
     }
 
-    private void SendEmailApproval(Dictionary<string, string> changedFields, EsoCompulsoryFields comFields, string RequestType, List<string> ccMails, string Category)
+    private static (string toMails, string ccMails, string bccMails) GetEmailApprovers(string connectionString, string Category, bool isApprovalEmail)
+    {
+        List<string> toMails = new List<string>();
+        List<string> ccMails = new List<string>();
+        List<string> bccMails = new List<string>();
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            conn.Open();
+            using (SqlCommand cmd = new SqlCommand("[dbo].[spZoho_GetEmailApprover]", conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@Category", Category.ToUpper());
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        if (!reader.IsDBNull(0))  // assuming email is in the first column
+                        {
+                            string email = reader.GetString(0).Trim();
+                            string recipientType = reader.GetString(1).Trim();
+                            string category = reader.GetString(2).Trim();
+
+                            if (isApprovalEmail)
+                            {
+                                if (recipientType == "TO")
+                                {
+                                    toMails.Add(email);
+                                }
+                            }
+                            else
+                            {
+                                if (recipientType == "CC")
+                                {
+                                    ccMails.Add(email);
+                                }
+                                else if (recipientType == "BCC")
+                                {
+                                    bccMails.Add(email);
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+
+        // Join the lists into semicolon-separated strings
+        string toMailsStr = string.Join(";", toMails);
+        string ccMailsStr = string.Join(";", ccMails);
+        string bccMailsStr = string.Join(";", bccMails);
+
+        return (toMailsStr, ccMailsStr, bccMailsStr);
+    }
+
+    public static (string htmlBody, string subject) EmailContentGenerator(Dictionary<string, string> changedFields, EsoCompulsoryFields comFields, string webhookLink, string token, string toEmail, string action, string RequestType, string formattedDate, bool isToRecipient, bool isApprovalEmail, string responderAction = null, string zohoResult = null)
+    {
+        string htmlBody = "";
+        string subject = "";
+        var changesTable = new StringBuilder();
+        var addressTable = new StringBuilder();
+        var addressRows = new StringBuilder();
+        var finalChangesTable = "";
+        var finalAddressTable = "";
+        string warningContent = "";
+        string zohoResultTable = "";
+        bool hasAnyAddressChange = false;
+
+        // Extract all address-related fields dynamically from addressFieldsMapping
+        var addressFields = addressFieldsMapping
+            .SelectMany(mapping => mapping.Value)  // Flatten the list of address key pairs
+            .Select(pair => pair.zohoKey)          // Get the Zoho keys for address fields
+            .Concat(addressFieldsMapping
+                .SelectMany(mapping => mapping.Value)
+                .Select(pair => pair.esoKey))      // Get the ESO keys for address fields
+            .ToList();                            // Collect them into a list
+
+        // Separate active non-address fields
+        var activeFields = fieldMappings
+            .Where(kvp =>
+                // Filter out address fields and check if they are in changedFields
+                !addressFields.Contains(kvp.Value.ZohoKey) &&
+                !addressFields.Contains(kvp.Value.CcmsKey) &&
+                (changedFields.ContainsKey(kvp.Value.ZohoKey) || changedFields.ContainsKey(kvp.Value.CcmsKey)))
+            .ToList();
+
+        int columnSpan = activeFields.Count;
+
+        if (RequestType.ToUpper() == "UPDATE")
+        {
+            if (activeFields.Count > 0)  // Render CHARGE RATES table only if changes exist
+            {
+                changesTable.Append($@"
+                    <table width='100%' border='1' cellspacing='0' cellpadding='5' style='text-align: center; border-collapse: collapse; font-size: 13px;'>
+                        <tr style='background-color: teal; color: white; text-align: center;'>
+                            <td colspan='{columnSpan * 2 + 1}'><strong>CHARGE RATES</strong></td>
+                        </tr>
+                        <tr style='text-align: center;'>
+                            <td style='background-color: #b9e3a4;' colspan='{columnSpan}'><strong>ZOHO (NOW)</strong></td>
+                            <td rowspan='3'></td>
+                            <td style='background-color: #00949033;' colspan='{columnSpan}'><strong>ZOHO (CHANGE TO)</strong></td>
+                        </tr>
+                        <tr style='background-color: #f2f2f2;'>");
+
+                foreach (var field in activeFields)
+                    changesTable.Append($@"<td><strong>{field.Key}</strong></td>");
+                foreach (var field in activeFields)
+                    changesTable.Append($@"<td><strong>{field.Key}</strong></td>");
+
+                changesTable.Append("</tr><tr>");
+
+                // Old values
+                foreach (var field in activeFields)
+                {
+                    string value = changedFields.ContainsKey(field.Value.ZohoKey)
+                        ? changedFields[field.Value.ZohoKey]?.ToUpper()
+                        : "";
+                    changesTable.Append($@"<td>{value}</td>");
+                }
+
+                // New values
+                foreach (var field in activeFields)
+                {
+                    string value = changedFields.ContainsKey(field.Value.CcmsKey)
+                        ? changedFields[field.Value.CcmsKey]?.ToUpper()
+                        : "";
+                    changesTable.Append($@"<td style='color:red;font-weight:bold;'>{value}</td>");
+                }
+
+                changesTable.Append("</tr></table><br>");
+                finalChangesTable = changesTable.ToString();
+            }
+
+            // ==== ADDRESS CHANGES ====
+
+            foreach (var kvp in addressFieldsMapping)
+            {
+                string addressType = kvp.Key;
+                var keys = kvp.Value;
+
+                string zStreet = "", zCity = "", zState = "", zZip = "";
+                string eStreet = "", eCity = "", eState = "", eZip = "";
+
+                foreach (var field in keys)
+                {
+                    string zValue = changedFields.ContainsKey(field.zohoKey) ? changedFields[field.zohoKey]?.ToUpper() : "";
+                    string eValue = changedFields.ContainsKey(field.esoKey) ? changedFields[field.esoKey]?.ToUpper() : "";
+
+                    if (field.zohoKey.Contains("Street") || field.zohoKey.Contains("Address"))
+                    {
+                        zStreet = zValue;
+                        eStreet = eValue;
+                    }
+                    else if (field.zohoKey.Contains("City"))
+                    {
+                        zCity = zValue;
+                        eCity = eValue;
+                    }
+                    else if (field.zohoKey.Contains("State"))
+                    {
+                        zState = zValue;
+                        eState = eValue;
+                    }
+                    else if (field.zohoKey.Contains("Zip") || field.zohoKey.Contains("Code"))
+                    {
+                        zZip = zValue;
+                        eZip = eValue;
+                    }
+                }
+
+                // Check if any value has changed
+                bool hasChange = zStreet != eStreet || zCity != eCity || zState != eState || zZip != eZip;
+
+                if (hasChange)
+                {
+                    addressRows.Append($@"
+                    <tr>
+                        <td><strong>{addressType}</strong></td>
+                        <td>{zStreet}</td>
+                        <td>{zCity}</td>
+                        <td>{zState}</td>
+                        <td>{zZip}</td>
+                        <td><strong>{addressType}</strong></td>
+                        <td style='{(zStreet != eStreet ? "color:red;font-weight:bold;" : "")}'>{eStreet}</td>
+                        <td style='{(zCity != eCity ? "color:red;font-weight:bold;" : "")}'>{eCity}</td>
+                        <td style='{(zState != eState ? "color:red;font-weight:bold;" : "")}'>{eState}</td>
+                        <td style='{(zZip != eZip ? "color:red;font-weight:bold;" : "")}'>{eZip}</td>
+                    </tr>");
+                    hasAnyAddressChange = true;
+                }
+            }
+
+
+            // Render Address Table if changes exist
+            if (hasAnyAddressChange)
+            {
+                finalAddressTable = $@"
+                <table width='100%' border='1' cellspacing='0' cellpadding='5' style='text-align: center; border-collapse: collapse; font-size: 13px;'>
+                    <tr style='background-color: teal; color: white; text-align: center;'>
+                        <td colspan='11'><strong>ADDRESS DETAILS</strong></td>
+                    </tr>
+                    <tr style='text-align: center;'>
+                        <td style='background-color: #b9e3a4;' colspan='5'><strong>ZOHO (NOW)</strong></td>
+                        <td rowspan='6'></td>
+                        <td style='background-color: #00949033;' colspan='5'><strong>ZOHO (CHANGE TO)</strong></td>
+                    </tr>
+                    <tr style='background-color: #f2f2f2;'>
+                        <td><strong>ADDRESS TYPE</strong></td>
+                        <td><strong>STREET</strong></td>
+                        <td><strong>CITY</strong></td>
+                        <td><strong>STATE</strong></td>
+                        <td><strong>ZIP</strong></td>
+                        <td><strong>ADDRESS TYPE</strong></td>
+                        <td><strong>STREET</strong></td>
+                        <td><strong>CITY</strong></td>
+                        <td><strong>STATE</strong></td>
+                        <td><strong>ZIP</strong></td>
+                    </tr>
+                    {addressRows}
+                </table>";
+            }
+            else
+            {
+                finalAddressTable = string.Empty;
+            }
+        }
+        else
+        {
+            warningContent = @"
+                                <p style='font-weight: bold; margin: 10px; padding: 10px; color: #dc3545; background-color: #f8d7da; border: 1px solid #f5c2c7; border-radius: 4px;text-align:center'>
+                                    ⚠️ Warning: Account Number is not available in the Zoho CRM.
+                                </p>";
+
+            if (activeFields.Count > 0)  // Only render the table if there are any active charge rate changes
+            {
+                // Initialize StringBuilder for changes table
+                changesTable.Append($@"
+                <table width=""100%"" border=""1"" cellspacing=""0"" cellpadding=""5"" style=""text-align: center; border-collapse: collapse; font-size: 13px;"">
+                    <tr style=""background-color: teal; color: white; text-align: center;"">
+                        <td colspan=""{columnSpan}""><strong>CHARGE RATES</strong></td> 
+                    </tr>
+                    <tr style=""background-color: #f2f2f2;"">
+                ");
+
+                // Loop through each active field and display the field names (now with only CCMS values)
+                foreach (var field in activeFields)
+                {
+                    changesTable.Append($@"<td><strong>{field.Key}</strong></td>");
+                }
+
+                changesTable.Append("</tr><tr>");
+
+                // Loop through each active field and only display the CCMS (new) values
+                foreach (var field in activeFields)
+                {
+                    string value = changedFields.ContainsKey(field.Value.CcmsKey) ? changedFields[field.Value.CcmsKey] : "";
+                    changesTable.Append($@"<td>{value}</td>");
+                }
+
+                changesTable.Append("</tr></table><br>");
+                finalChangesTable = changesTable.ToString();
+            }
+            // ==== ADDRESS CHANGES ====
+
+            foreach (var kvp in addressFieldsMapping)
+            {
+                string addressType = kvp.Key;
+                var keys = kvp.Value;
+
+                string eStreet = "", eCity = "", eState = "", eZip = "";
+
+                foreach (var field in keys)
+                {
+                    string eValue = changedFields.ContainsKey(field.esoKey) ? changedFields[field.esoKey]?.ToUpper() : "";
+
+                    if (field.zohoKey.Contains("Street") || field.zohoKey.Contains("Address"))
+                    {
+                        eStreet = eValue;
+                    }
+                    else if (field.zohoKey.Contains("City"))
+                    {
+                        eCity = eValue;
+                    }
+                    else if (field.zohoKey.Contains("State"))
+                    {
+                        eState = eValue;
+                    }
+                    else if (field.zohoKey.Contains("Zip") || field.zohoKey.Contains("Code"))
+                    {
+                        eZip = eValue;
+                    }
+                }
+
+
+                // Check if any value has changed
+                bool hasChange = eStreet != "" || eCity != "" || eState != "" || eZip != "";
+
+                if (hasChange)
+                {
+                    addressRows.Append($@"
+                        <tr>
+                            <td><strong>{addressType}</strong></td>
+                            <td>{eStreet}</td>
+                            <td>{eCity}</td>
+                            <td>{eState}</td>
+                            <td>{eZip}</td>
+                        </tr>");
+
+                    hasAnyAddressChange = true;
+                }
+            }
+
+
+            // Render Address Table if changes exist
+            if (hasAnyAddressChange)
+            {
+                finalAddressTable = $@"
+                <table width='100%' border='1' cellspacing='0' cellpadding='5' style='text-align: center; border-collapse: collapse; font-size: 13px;'>
+                    <tr style='background-color: teal; color: white; text-align: center;'>
+                        <td colspan='11'><strong>ADDRESS DETAILS</strong></td>
+                    </tr>
+    
+                    <tr style='background-color: #f2f2f2;'>
+                        <td><strong>ADDRESS TYPE</strong></td>
+                        <td><strong>STREET</strong></td>
+                        <td><strong>CITY</strong></td>
+                        <td><strong>STATE</strong></td>
+                        <td><strong>ZIP</strong></td>
+                    </tr>
+                    {addressRows}
+                </table>";
+            }
+            else
+            {
+                finalAddressTable = string.Empty;
+            }
+        }
+
+        if (responderAction != null && responderAction == "approve")
+        {
+            zohoResultTable = $@"
+                              <tr>
+                                <td align=""right"" style=""color: gray; font-weight: bold;"">ZOHO CRM STATUS</td>
+                                <td style=""font-weight: bold;"">{zohoResult.ToUpper()}</td>
+                              </tr>";
+        }
+
+        htmlBody = $@"
+            <html>
+              <body style=""margin: 0; padding: 0; font-family: Arial, sans-serif; font-size: 14px;"">
+                <table width=""100%"" cellpadding=""0"" cellspacing=""0"" border=""0"" style=""background-color: #ffffff;"">
+                  <tr>
+                    <td align=""center"">
+                      <!-- Wrapper Table with Max Width -->
+                      <table width=""800"" cellpadding=""0"" cellspacing=""0"" border=""0"" style=""width: 980px; border: solid 1px teal; border-radius: 5px; max-width: auto; margin: 0 auto;"">
+
+                        <!-- Header Section -->
+                        <tr>
+                          <td align=""center"" style=""padding: 10px;"">
+                            <img src=""https://snapshots.medicount.com/Images/medicount_mail_logo_new.jpg"" alt=""Medicount Logo"" height=""50"" style=""display: block;"">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align=""center"" style=""font-size: 18px; font-weight: bold; padding-bottom: 10px;"">
+                            {(isApprovalEmail ? "APPROVAL REQUEST" : "CHANGES FROM")} ({action})
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align=""center"" style=""padding-bottom: 10px;"">
+                            <span style=""background-color: #f5f5f5; padding: 5px 10px; border-radius: 4px; font-size: 14px; color: #333333;font-weight:bold"">
+                              {DateTime.Now.ToString("MMM-dd-yyyy | hh:mm tt")}
+                            </span>
+                          </td>
+                        </tr>
+
+                        <!-- Account Details -->
+                        <tr>
+                          <td align=""center"">
+                            <table cellpadding=""5"" cellspacing=""0"" border=""0"" style=""margin: 0 auto; text-align: left;"">
+                              <tr>
+                                <td align=""right"" style=""color: gray; font-weight: bold;"">ACCOUNT NAME</td>
+                                <td style=""font-weight: bold;"">{comFields.AccountName.ToUpper()}</td>
+                              </tr>
+                              <tr>
+                                <td align=""right"" style=""color: gray; font-weight: bold;"">ACCOUNT NUMBER</td>
+                                <td style=""font-weight: bold;"">{comFields.CompanyId}</td>
+                              </tr>
+                              <tr>
+                                <td align=""right"" style=""color: gray; font-weight: bold;"">{(responderAction == null ? "REQUESTED BY" : responderAction == "approve" ? "APPROVED BY" : "REJECTED BY")}</td>
+                                <td style=""font-weight: bold;"">{comFields.RequestedBy.ToUpper()}</td>
+                              </tr>
+                              {zohoResultTable}
+                            </table>
+                          </td>
+                        </tr>
+
+                        <!-- Instruction -->
+                        <tr>
+                          <td style=""padding: 10px;"">
+                            {warningContent}
+                            <p style=""font-weight: bold; margin: 0 0 10px;"">PLEASE {(isToRecipient && isApprovalEmail ? "REVIEW" : "SEE")} THE FOLLOWING CHANGES:</p>
+                            {finalChangesTable}
+                            {finalAddressTable}
+                          </td>
+                        </tr>";
+
+        if (isToRecipient && isApprovalEmail)
+        {
+            subject = $"Approval Needed ({action}) for Account: {comFields.AccountName} - {formattedDate}";
+            htmlBody += $@"<!-- Buttons -->
+                        <tr>
+                          <td style=""padding: 10px;"">
+                            <p style=""font-weight: bold;"">Click one of the options below to respond:</p>
+                            <table cellpadding=""0"" cellspacing=""0"" border=""0"">
+                              <tr>
+                                <td style=""padding-right: 10px;"">
+                                  <a href=""{webhookLink}&token={HttpUtility.UrlEncode(Encrypt(token))}&uid={HttpUtility.UrlEncode(Encrypt(comFields.Id.ToString()))}&responder={HttpUtility.UrlEncode(Encrypt(toEmail))}&decision={HttpUtility.UrlEncode(Encrypt("approve"))}&requesttype={HttpUtility.UrlEncode(Encrypt(RequestType.ToLower()))}""
+                                     style=""display: inline-block; padding: 12px 20px; background-color: #28a745; color: #ffffff; text-decoration: none; border-radius: 4px;"">
+                                    ✅ Approve
+                                  </a>
+                                </td>
+                                <td>
+                                  <a href=""{webhookLink}&token={HttpUtility.UrlEncode(Encrypt(token))}&uid={HttpUtility.UrlEncode(Encrypt(comFields.Id.ToString()))}&responder={HttpUtility.UrlEncode(Encrypt(toEmail))}&decision={HttpUtility.UrlEncode(Encrypt("reject"))}&requesttype={HttpUtility.UrlEncode(Encrypt(RequestType.ToLower()))}""
+                                     style=""display: inline-block; padding: 12px 20px; background-color: #dc3545; color: #ffffff; text-decoration: none; border-radius: 4px;"">
+                                    ❌ Reject
+                                  </a>
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>";
+        }
+        else
+        {
+            subject = $"Changes from ({action}) for Account: {comFields.AccountName} - {formattedDate}";
+        }
+        htmlBody += $@"       
+                        <!-- Footer -->
+                        <tr>
+                            <td style=""padding: 10px;"">
+                            <p style=""margin: 0 0 10px;"">If you did not request this action, you can safely ignore this email.</p>
+                            <table border=""0"" cellspacing=""0"" cellpadding=""0"">
+                                <tbody>
+                                    <tr>
+                                        <td>Thanks,</td>
+                                    </tr>
+                                    <tr>
+                                        <td style=""font-weight:bold"">Medicount Management, Inc.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            </td>
+                        </tr>
+
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </body>
+            </html>
+            ";
+
+        return (htmlBody, subject);
+    }
+
+    private void SendEmailApproval(Dictionary<string, string> changedFields, EsoCompulsoryFields comFields, string accOwnerEmail, string RequestType, bool isApprovalEmail, string toRecipients, string ccRecipients, string bccRecipients, string responderAction = null, string zohoResult = null)
     {
         string smtpHost = "";
         int smtpPort = 0;
@@ -791,565 +1310,190 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
         //    }
         //}
 
+        // Split recipients
+        List<string> toMails = toRecipients?
+            .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(email => email.Trim())
+            .Where(email => !string.IsNullOrWhiteSpace(email))
+            .ToList() ?? new List<string>();
+
+        List<string> ccMails = ccRecipients?
+            .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(email => email.Trim())
+            .Where(email => !string.IsNullOrWhiteSpace(email))
+            .ToList() ?? new List<string>();
+
+        List<string> bccMails = bccRecipients?
+            .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(email => email.Trim())
+            .Where(email => !string.IsNullOrWhiteSpace(email))
+            .ToList() ?? new List<string>();
+
+
         string action = "ESO TO ZOHO";
-        List<string> recipients = new List<string>();
-        List<string> bccMails = new List<string>();
-        using (SqlConnection conn = new SqlConnection(connectionString))
-        {
-            conn.Open();
-            {
-                SqlCommand cmd = new SqlCommand("[dbo].[spZoho_GetEmailApprover]", conn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@Category", Category.ToUpper());
-
-                using (SqlDataReader reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        if (!reader.IsDBNull(0))  // assuming email is in the first column
-                        {
-                            string email = reader.GetString(0).Trim();
-                            string recipientType = reader.GetString(1).Trim();
-                            string category = reader.GetString(2).Trim();
-                            if (recipientType == "TO")
-                            {
-                                recipients.Add(email);
-                            }
-                            else if(recipientType == "CC")
-                            {
-                                ccMails.Add(email);
-                            }    
-                            else if (recipientType == "BCC")
-                            {
-                                bccMails.Add(email);
-                            }
-                        }
-                    }
-                }
-            }
-
-        }
         string token = Guid.NewGuid().ToString(); // Unique per recipient
-        //string webhookLink = "https://snapshots.medicount.com/CcmsToZohoCrm.aspx";
+        //string webhookLink = "https://snapshots.medicount.com/EsoToZohoCrm.aspx";
         string webhookLink = $"{HttpContext.Current.Request.Url.AbsoluteUri}?";
-        var changesTable = new StringBuilder();
-        var addressTable = new StringBuilder();
-        var addressRows = new StringBuilder();
-        var finalChangesTable = "";
-        var finalAddressTable = "";
-        string warningContent = "";
-        bool hasAnyAddressChange = false;
-        List<string> failedRecipients = new List<string>();
+        
         List<string> successfulRecipients = new List<string>();
+        List<string> failedRecipients = new List<string>();
+        string formattedDate = DateTime.Now.ToString("MM/dd/yyyy (hh:mm:ss tt)", CultureInfo.InvariantCulture);
 
 
-        if (recipients.Count != 0)
+        // STEP 1: Send to each "To" recipient individually
+        foreach (string toEmail in toMails)
         {
-
-            // Extract all address-related fields dynamically from addressFieldsMapping
-            var addressFields = addressFieldsMapping
-                .SelectMany(mapping => mapping.Value)  // Flatten the list of address key pairs
-                .Select(pair => pair.zohoKey)          // Get the Zoho keys for address fields
-                .Concat(addressFieldsMapping
-                    .SelectMany(mapping => mapping.Value)
-                    .Select(pair => pair.esoKey))      // Get the ESO keys for address fields
-                .ToList();                            // Collect them into a list
-
-            // Separate active non-address fields
-            var activeFields = fieldMappings
-                .Where(kvp =>
-                    // Filter out address fields and check if they are in changedFields
-                    !addressFields.Contains(kvp.Value.ZohoKey) &&
-                    !addressFields.Contains(kvp.Value.CcmsKey) &&
-                    (changedFields.ContainsKey(kvp.Value.ZohoKey) || changedFields.ContainsKey(kvp.Value.CcmsKey)))
-                .ToList();
-
-            int columnSpan = activeFields.Count;
-
-            if (RequestType == "UPDATE")
+            try
             {
-                if (activeFields.Count > 0)  // Render CHARGE RATES table only if changes exist
+                bool isToRecipient = true;
+                var (htmlBody, subject) = EmailContentGenerator(
+                    changedFields, comFields, webhookLink, token, toEmail, action, RequestType, formattedDate, isToRecipient, isApprovalEmail, responderAction, zohoResult);
+
+                MailMessage mail = new MailMessage
                 {
-                    changesTable.Append($@"
-<table width='100%' border='1' cellspacing='0' cellpadding='5' style='text-align: center; border-collapse: collapse; font-size: 13px;'>
-    <tr style='background-color: teal; color: white; text-align: center;'>
-        <td colspan='{columnSpan * 2 + 1}'><strong>CHARGE RATES</strong></td>
-    </tr>
-    <tr style='text-align: center;'>
-        <td style='background-color: #b9e3a4;' colspan='{columnSpan}'><strong>ZOHO (NOW)</strong></td>
-        <td rowspan='3'></td>
-        <td style='background-color: #00949033;' colspan='{columnSpan}'><strong>ZOHO (CHANGE TO)</strong></td>
-    </tr>
-    <tr style='background-color: #f2f2f2;'>");
+                    From = new MailAddress(smtpEmail),
+                    Subject = subject,
+                    Body = htmlBody,
+                    IsBodyHtml = true
+                };
+                mail.To.Add(toEmail);
 
-                    foreach (var field in activeFields)
-                        changesTable.Append($@"<td><strong>{field.Key}</strong></td>");
-                    foreach (var field in activeFields)
-                        changesTable.Append($@"<td><strong>{field.Key}</strong></td>");
-
-                    changesTable.Append("</tr><tr>");
-
-                    // Old values
-                    foreach (var field in activeFields)
-                    {
-                        string value = changedFields.ContainsKey(field.Value.ZohoKey)
-                            ? changedFields[field.Value.ZohoKey]?.ToUpper()
-                            : "";
-                        changesTable.Append($@"<td>{value}</td>");
-                    }
-
-                    // New values
-                    foreach (var field in activeFields)
-                    {
-                        string value = changedFields.ContainsKey(field.Value.CcmsKey)
-                            ? changedFields[field.Value.CcmsKey]?.ToUpper()
-                            : "";
-                        changesTable.Append($@"<td style='color:red;font-weight:bold;'>{value}</td>");
-                    }
-
-                    changesTable.Append("</tr></table><br>");
-                    finalChangesTable = changesTable.ToString();
+                using (SmtpClient smtp = new SmtpClient(smtpHost, smtpPort))
+                {
+                    smtp.Credentials = new NetworkCredential(smtpEmail, smtpPassword);
+                    smtp.EnableSsl = true;
+                    smtp.Send(mail);
                 }
 
-                // ==== ADDRESS CHANGES ====
-
-                foreach (var kvp in addressFieldsMapping)
-                {
-                    string addressType = kvp.Key;
-                    var keys = kvp.Value;
-
-                    string zStreet = "", zCity = "", zState = "", zZip = "";
-                    string eStreet = "", eCity = "", eState = "", eZip = "";
-
-                    foreach (var field in keys)
-                    {
-                        string zValue = changedFields.ContainsKey(field.zohoKey) ? changedFields[field.zohoKey]?.ToUpper() : "";
-                        string eValue = changedFields.ContainsKey(field.esoKey) ? changedFields[field.esoKey]?.ToUpper() : "";
-
-                        if (field.zohoKey.Contains("Street") || field.zohoKey.Contains("Address"))
-                        {
-                            zStreet = zValue;
-                            eStreet = eValue;
-                        }
-                        else if (field.zohoKey.Contains("City"))
-                        {
-                            zCity = zValue;
-                            eCity = eValue;
-                        }
-                        else if (field.zohoKey.Contains("State"))
-                        {
-                            zState = zValue;
-                            eState = eValue;
-                        }
-                        else if (field.zohoKey.Contains("Zip") || field.zohoKey.Contains("Code"))
-                        {
-                            zZip = zValue;
-                            eZip = eValue;
-                        }
-                    }
-
-                    // Check if any value has changed
-                    bool hasChange = zStreet != eStreet || zCity != eCity || zState != eState || zZip != eZip;
-
-                    if (hasChange)
-                    {
-                        addressRows.Append($@"
-<tr>
-    <td><strong>{addressType}</strong></td>
-    <td>{zStreet}</td>
-    <td>{zCity}</td>
-    <td>{zState}</td>
-    <td>{zZip}</td>
-    <td><strong>{addressType}</strong></td>
-    <td style='{(zStreet != eStreet ? "color:red;font-weight:bold;" : "")}'>{eStreet}</td>
-    <td style='{(zCity != eCity ? "color:red;font-weight:bold;" : "")}'>{eCity}</td>
-    <td style='{(zState != eState ? "color:red;font-weight:bold;" : "")}'>{eState}</td>
-    <td style='{(zZip != eZip ? "color:red;font-weight:bold;" : "")}'>{eZip}</td>
-</tr>");
-                        hasAnyAddressChange = true;
-                    }
-                }
-
-
-                // Render Address Table if changes exist
-                if (hasAnyAddressChange)
-                {
-                    finalAddressTable = $@"
-<table width='100%' border='1' cellspacing='0' cellpadding='5' style='text-align: center; border-collapse: collapse; font-size: 13px;'>
-    <tr style='background-color: teal; color: white; text-align: center;'>
-        <td colspan='11'><strong>ADDRESS DETAILS</strong></td>
-    </tr>
-    <tr style='text-align: center;'>
-        <td style='background-color: #b9e3a4;' colspan='5'><strong>ZOHO (NOW)</strong></td>
-        <td rowspan='6'></td>
-        <td style='background-color: #00949033;' colspan='5'><strong>ZOHO (CHANGE TO)</strong></td>
-    </tr>
-    <tr style='background-color: #f2f2f2;'>
-        <td><strong>ADDRESS TYPE</strong></td>
-        <td><strong>STREET</strong></td>
-        <td><strong>CITY</strong></td>
-        <td><strong>STATE</strong></td>
-        <td><strong>ZIP</strong></td>
-        <td><strong>ADDRESS TYPE</strong></td>
-        <td><strong>STREET</strong></td>
-        <td><strong>CITY</strong></td>
-        <td><strong>STATE</strong></td>
-        <td><strong>ZIP</strong></td>
-    </tr>
-    {addressRows}
-</table>";
-                }
-                else
-                {
-                    finalAddressTable = string.Empty;
-                }
+                successfulRecipients.Add(toEmail);
             }
-            else
+            catch (Exception ex)
             {
-                warningContent = @"
-                                <p style='font-weight: bold; margin: 10px; padding: 10px; color: #dc3545; background-color: #f8d7da; border: 1px solid #f5c2c7; border-radius: 4px;text-align:center'>
-                                    ⚠️ Warning: Account Number is not available in the Zoho CRM.
-                                </p>";
-
-                if (activeFields.Count > 0)  // Only render the table if there are any active charge rate changes
-                {
-                    // Initialize StringBuilder for changes table
-                    changesTable.Append($@"
-                <table width=""100%"" border=""1"" cellspacing=""0"" cellpadding=""5"" style=""text-align: center; border-collapse: collapse; font-size: 13px;"">
-                    <tr style=""background-color: teal; color: white; text-align: center;"">
-                        <td colspan=""{columnSpan}""><strong>CHARGE RATES</strong></td> 
-                    </tr>
-                    <tr style=""background-color: #f2f2f2;"">
-                ");
-
-                    // Loop through each active field and display the field names (now with only CCMS values)
-                    foreach (var field in activeFields)
-                    {
-                        changesTable.Append($@"<td><strong>{field.Key}</strong></td>");
-                    }
-
-                    changesTable.Append("</tr><tr>");
-
-                    // Loop through each active field and only display the CCMS (new) values
-                    foreach (var field in activeFields)
-                    {
-                        string value = changedFields.ContainsKey(field.Value.CcmsKey) ? changedFields[field.Value.CcmsKey] : "";
-                        changesTable.Append($@"<td>{value}</td>");
-                    }
-
-                    changesTable.Append("</tr></table><br>");
-                    finalChangesTable = changesTable.ToString();
-                }
-                // ==== ADDRESS CHANGES ====
-
-                foreach (var kvp in addressFieldsMapping)
-                {
-                    string addressType = kvp.Key;
-                    var keys = kvp.Value;
-
-                    string eStreet = "", eCity = "", eState = "", eZip = "";
-
-                    foreach (var field in keys)
-                    {
-                        string eValue = changedFields.ContainsKey(field.esoKey) ? changedFields[field.esoKey]?.ToUpper() : "";
-
-                        if (field.zohoKey.Contains("Street") || field.zohoKey.Contains("Address"))
-                        {
-                            eStreet = eValue;
-                        }
-                        else if (field.zohoKey.Contains("City"))
-                        {
-                            eCity = eValue;
-                        }
-                        else if (field.zohoKey.Contains("State"))
-                        {
-                            eState = eValue;
-                        }
-                        else if (field.zohoKey.Contains("Zip") || field.zohoKey.Contains("Code"))
-                        {
-                            eZip = eValue;
-                        }
-                    }
-
-
-                    // Check if any value has changed
-                    bool hasChange = eStreet != "" || eCity != "" || eState != "" || eZip != "";
-
-                    if (hasChange)
-                    {
-                        addressRows.Append($@"
-                        <tr>
-                            <td><strong>{addressType}</strong></td>
-                            <td>{eStreet}</td>
-                            <td>{eCity}</td>
-                            <td>{eState}</td>
-                            <td>{eZip}</td>
-                        </tr>");
-
-                    hasAnyAddressChange = true;
-                }
+                Console.WriteLine($"❌ Failed to send email to {toEmail}: {ex.Message}");
+                failedRecipients.Add($"{toEmail} - {ex.Message}");
             }
-
-
-                // Render Address Table if changes exist
-                if (hasAnyAddressChange)
-                {
-                    finalAddressTable = $@"
-<table width='100%' border='1' cellspacing='0' cellpadding='5' style='text-align: center; border-collapse: collapse; font-size: 13px;'>
-    <tr style='background-color: teal; color: white; text-align: center;'>
-        <td colspan='11'><strong>ADDRESS DETAILS</strong></td>
-    </tr>
-    
-    <tr style='background-color: #f2f2f2;'>
-        <td><strong>ADDRESS TYPE</strong></td>
-        <td><strong>STREET</strong></td>
-        <td><strong>CITY</strong></td>
-        <td><strong>STATE</strong></td>
-        <td><strong>ZIP</strong></td>
-    </tr>
-    {addressRows}
-</table>";
-                }
-                else
-                {
-                    finalAddressTable = string.Empty;
-                }
-
-
-            }
-
-            bool torecipientOver = false;
-            recipients.Add("TO RECIPIENTS OVER");// Just to send the cc and bcc emails, this name is added
-            foreach (string toEmail in recipients)
-            {
-                torecipientOver = toEmail == "TO RECIPIENTS OVER" ? true : false;
-                // Create HTML content with personalized approval/reject links
-                string htmlBody = $@"
-            <html>
-              <body style=""margin: 0; padding: 0; font-family: Arial, sans-serif; font-size: 14px;"">
-                <table width=""100%"" cellpadding=""0"" cellspacing=""0"" border=""0"" style=""background-color: #ffffff;"">
-                  <tr>
-                    <td align=""center"">
-                      <!-- Wrapper Table with Max Width -->
-                      <table width=""800"" cellpadding=""0"" cellspacing=""0"" border=""0"" style=""width: 980px; border: solid 1px teal; border-radius: 5px; max-width: auto; margin: 0 auto;"">
-
-                        <!-- Header Section -->
-                        <tr>
-                          <td align=""center"" style=""padding: 10px;"">
-                            <img src=""https://snapshots.medicount.com/Images/medicount_mail_logo_new.jpg"" alt=""Medicount Logo"" height=""50"" style=""display: block;"">
-                          </td>
-                        </tr>
-                        <tr>
-                          <td align=""center"" style=""font-size: 18px; font-weight: bold; padding-bottom: 10px;"">
-                            APPROVAL REQUEST ({action})
-                          </td>
-                        </tr>
-                        <tr>
-                          <td align=""center"" style=""padding-bottom: 10px;"">
-                            <span style=""background-color: #f5f5f5; padding: 5px 10px; border-radius: 4px; font-size: 14px; color: #333333;font-weight:bold"">
-                              {DateTime.Now.ToString("MMM-dd-yyyy | hh:mm tt")}
-                            </span>
-                          </td>
-                        </tr>
-
-                        <!-- Account Details -->
-                        <tr>
-                          <td align=""center"">
-                            <table cellpadding=""5"" cellspacing=""0"" border=""0"" style=""margin: 0 auto; text-align: left;"">
-                              <tr>
-                                <td align=""right"" style=""color: gray; font-weight: bold;"">ACCOUNT NAME</td>
-                                <td style=""font-weight: bold;"">{comFields.AccountName.ToUpper()}</td>
-                              </tr>
-                              <tr>
-                                <td align=""right"" style=""color: gray; font-weight: bold;"">ACCOUNT NUMBER</td>
-                                <td style=""font-weight: bold;"">{comFields.CompanyId}</td>
-                              </tr>
-                              <tr>
-                                <td align=""right"" style=""color: gray; font-weight: bold;"">REQUESTED BY</td>
-                                <td style=""font-weight: bold;"">{comFields.RequestedBy.ToUpper()}</td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-
-                        <!-- Instruction -->
-                        <tr>
-                          <td style=""padding: 10px;"">
-                            {warningContent}
-                            <p style=""font-weight: bold; margin: 0 0 10px;"">PLEASE REVIEW THE FOLLOWING CHANGES:</p>
-                            {finalChangesTable}
-                            {finalAddressTable}
-                          </td>
-                        </tr>";
-
-                if (!torecipientOver)
-                {
-                    htmlBody += $@"<!-- Buttons -->
-                        <tr>
-                          <td style=""padding: 10px;"">
-                            <p style=""font-weight: bold;"">Click one of the options below to respond:</p>
-                            <table cellpadding=""0"" cellspacing=""0"" border=""0"">
-                              <tr>
-                                <td style=""padding-right: 10px;"">
-                                  <a href=""{webhookLink}&token={HttpUtility.UrlEncode(Encrypt(token))}&uid={HttpUtility.UrlEncode(Encrypt(comFields.Id.ToString()))}&responder={HttpUtility.UrlEncode(Encrypt(toEmail))}&decision={HttpUtility.UrlEncode(Encrypt("approve"))}&requesttype={HttpUtility.UrlEncode(Encrypt(RequestType.ToLower()))}""
-                                     style=""display: inline-block; padding: 12px 20px; background-color: #28a745; color: #ffffff; text-decoration: none; border-radius: 4px;"">
-                                    ✅ Approve
-                                  </a>
-                                </td>
-                                <td>
-                                  <a href=""{webhookLink}&token={HttpUtility.UrlEncode(Encrypt(token))}&uid={HttpUtility.UrlEncode(Encrypt(comFields.Id.ToString()))}&responder={HttpUtility.UrlEncode(Encrypt(toEmail))}&decision={HttpUtility.UrlEncode(Encrypt("reject"))}&requesttype={HttpUtility.UrlEncode(Encrypt(RequestType.ToLower()))}""
-                                     style=""display: inline-block; padding: 12px 20px; background-color: #dc3545; color: #ffffff; text-decoration: none; border-radius: 4px;"">
-                                    ❌ Reject
-                                  </a>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>";
-                }
-                
-
-                    htmlBody += $@"       
-                        <!-- Footer -->
-                        <tr>
-                            <td style=""padding: 10px;"">
-                            <p style=""margin: 0 0 10px;"">If you did not request this action, you can safely ignore this email.</p>
-                            <table border=""0"" cellspacing=""0"" cellpadding=""0"">
-                                <tbody>
-                                    <tr>
-                                        <td>Thanks,</td>
-                                    </tr>
-                                    <tr>
-                                        <td style=""font-weight:bold"">Medicount Management, Inc.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            </td>
-                        </tr>
-
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-              </body>
-            </html>
-            ";
-
-                try
-                {
-                    string formattedDate = DateTime.Now.ToString("MM/dd/yyyy (hh:mm:ss tt)", CultureInfo.InvariantCulture);
-                    MailMessage mail = new MailMessage
-                    {
-                        From = new MailAddress(smtpEmail),
-                        Subject = torecipientOver ? $"Changes from ({action}) for Account: {comFields.AccountName} - {formattedDate}" : $"Approval Needed ({action}) for Account: {comFields.AccountName} - {formattedDate}",
-                        Body = htmlBody,
-                        IsBodyHtml = true
-                    };
-                    if (!torecipientOver)
-                    {
-                        mail.To.Add(toEmail);
-                    }
-                    else
-                    {
-                        // Add all CC emails (if any)
-                        if (ccMails != null && ccMails.Count > 0)
-                        {
-                            foreach (var ccEmail in ccMails)
-                            {
-                                mail.CC.Add(ccEmail);
-                            }
-                        }
-
-                        // Add all BCC emails (if any)
-                        if (bccMails != null && bccMails.Count > 0)
-                        {
-                            foreach (var bccEmail in bccMails)
-                            {
-                                mail.Bcc.Add(bccEmail);
-                            }
-                        }
-                    }
-
-                        using (SmtpClient smtp = new SmtpClient(smtpHost, smtpPort))
-                        {
-                            smtp.Credentials = new NetworkCredential(smtpEmail, smtpPassword);
-                            smtp.EnableSsl = true;
-                            smtp.Send(mail);
-                        }
-
-                    Console.WriteLine($"✅ Email sent to {toEmail}");
-                    successfulRecipients.Add(toEmail);   
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"❌ Failed to send email to {toEmail}: {ex.Message}");
-                    failedRecipients.Add($"{toEmail} - {ex.Message}"); 
-                }
-            }
-
-            // Save summary once after all emails
-            string emailStatus = failedRecipients.Count > 0
-                ? (successfulRecipients.Count > 0 ? "PARTIAL SUCCESS" : "ERROR")
-                : "PENDING";
-
-            string errorMsg = string.Join("; ", failedRecipients);
-            string allRecipients = string.Join(",", recipients);
-            if (recipients.Count > 0) allRecipients += ",";
-
-            allRecipients += string.Join(",", ccMails);
-            if (ccMails.Count > 0) allRecipients += ",";
-
-            allRecipients += string.Join(",", bccMails);
-            allRecipients = allRecipients.Replace("TO RECIPIENTS OVER", "").Trim(',').Trim();
-            // Save approval request record per recipient
-            SaveToEmailApprovalTable(changedFields, comFields, token, emailStatus, errorMsg, allRecipients);
-
         }
-        else // No Recepient(No Email Address)
+
+        // STEP 2: Send one email to CC and BCC only (if any exist)
+        if (ccMails.Count > 0 || bccMails.Count > 0)
         {
-            //Console.WriteLine("No Email Address");
+            try
+            {
+                bool isToRecipient = false;
+                var (htmlBody, subject) = EmailContentGenerator(
+                    changedFields, comFields, webhookLink, token, "null", action, RequestType, formattedDate, isToRecipient, isApprovalEmail, responderAction, zohoResult);
+
+                MailMessage mail = new MailMessage
+                {
+                    From = new MailAddress(smtpEmail),
+                    Subject = subject,
+                    Body = htmlBody,
+                    IsBodyHtml = true
+                };
+
+                foreach (var cc in ccMails)
+                    mail.CC.Add(cc);
+
+                foreach (var bcc in bccMails)
+                    mail.Bcc.Add(bcc);
+
+                using (SmtpClient smtp = new SmtpClient(smtpHost, smtpPort))
+                {
+                    smtp.Credentials = new NetworkCredential(smtpEmail, smtpPassword);
+                    smtp.EnableSsl = true;
+                    smtp.Send(mail);
+                }
+
+                successfulRecipients.AddRange(ccMails);
+                successfulRecipients.AddRange(bccMails);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Failed to send email to CC/BCC group: {ex.Message}");
+                failedRecipients.Add($"CC/BCC - {ex.Message}");
+            }
         }
+
+        // STEP 3: Save status
+        string status = failedRecipients.Count > 0
+            ? (successfulRecipients.Count > 0 ? "PARTIAL SUCCESS" : "ERROR")
+            : "PENDING";
+
+        string errorMsg = string.Join("; ", failedRecipients);
+
+        string toSection = "[TO] " + string.Join(",", toMails);
+        string ccSection = "[CC] " + string.Join(",", ccMails);
+        string bccSection = "[BCC] " + string.Join(",", bccMails);
+        string allRecipients = $"{toSection} |{ccSection} |{bccSection}";
+
+        SaveToEmailApprovalTable(changedFields, comFields, accOwnerEmail, token, status, errorMsg, allRecipients, isApprovalEmail);
     }
 
-    private void SaveToEmailApprovalTable(Dictionary<string, string> changedFields, EsoCompulsoryFields comFields, string token, string emailStatus, string errorMsg, string toEmail)
+    private void SaveToEmailApprovalTable(Dictionary<string, string> changedFields, EsoCompulsoryFields comFields, string accOwnerEmail, string token, string emailStatus, string errorMsg, string allRecipients, bool isApprovalEmail)
     {
 
-        using (SqlConnection connection = new SqlConnection(connectionString))
+        if (isApprovalEmail)
         {
-            connection.Open();
-
-            string changesJson = JsonConvert.SerializeObject(changedFields);
-
-            // Use stored procedure name instead of raw SQL
-            string storedProcedureName = "";
-            storedProcedureName = "spZoho_InsertCCMSEmailApprovalForZohoCRM";
-
-            using (SqlCommand command = new SqlCommand(storedProcedureName, connection))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                // Indicate that this is a stored procedure, not a regular SQL query
-                command.CommandType = System.Data.CommandType.StoredProcedure;
+                connection.Open();
 
-                // Add parameters for the stored procedure
+                string changesJson = JsonConvert.SerializeObject(changedFields);
 
-                command.Parameters.AddWithValue("@ChangesJson", changesJson);
-                command.Parameters.AddWithValue("@CreatedBy", comFields.RequestedBy ?? "");
-                command.Parameters.AddWithValue("@AccountName", comFields.AccountName ?? "");
-                command.Parameters.AddWithValue("@AccountId", comFields.CompanyId);
-                command.Parameters.AddWithValue("@ClientDetailsId", comFields.Id);
-                command.Parameters.AddWithValue("@ZohoCrmRecordId", comFields.ZohoCrmId);
+                // Use stored procedure name instead of raw SQL
+                string storedProcedureName = "";
+                storedProcedureName = "spZoho_InsertEmailApprovalForZohoCRM";
 
-                command.Parameters.AddWithValue("@Token", token);
-                command.Parameters.AddWithValue("@EmailStatus", emailStatus);
-                command.Parameters.AddWithValue("@ErrorMsg", errorMsg);
-                command.Parameters.AddWithValue("@EmailReceiver", toEmail);
+                using (SqlCommand command = new SqlCommand(storedProcedureName, connection))
+                {
+                    // Indicate that this is a stored procedure, not a regular SQL query
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
 
+                    // Add parameters for the stored procedure
 
+                    command.Parameters.AddWithValue("@ChangesJson", changesJson);
+                    command.Parameters.AddWithValue("@CreatedBy", comFields.RequestedBy ?? "");
+                    command.Parameters.AddWithValue("@AccountName", comFields.AccountName ?? "");
+                    command.Parameters.AddWithValue("@AccountId", comFields.CompanyId);
+                    command.Parameters.AddWithValue("@ClientDetailsId", comFields.Id);
+                    command.Parameters.AddWithValue("@ZohoCrmRecordId", comFields.ZohoCrmId);
+                    command.Parameters.AddWithValue("@AccOwnerEmail", accOwnerEmail);
 
-                // Execute the stored procedure
-                command.ExecuteNonQuery();
+                    command.Parameters.AddWithValue("@Token", token);
+                    command.Parameters.AddWithValue("@EmailStatus", emailStatus);
+                    command.Parameters.AddWithValue("@ErrorMsg", errorMsg);
+                    command.Parameters.AddWithValue("@EmailReceiver", allRecipients);
+
+                    // Execute the stored procedure
+                    command.ExecuteNonQuery();
+                }
             }
-
         }
+        else
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                // Use stored procedure name instead of raw SQL
+                string storedProcedureName = "";
+                storedProcedureName = "spZoho_UpdateConfirmEmailStatus";
+
+                using (SqlCommand command = new SqlCommand(storedProcedureName, connection))
+                {
+                    // Indicate that this is a stored procedure, not a regular SQL query
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    // Add parameters for the stored procedure
+                    command.Parameters.AddWithValue("Id", comFields.Id);
+                    command.Parameters.AddWithValue("@ErrorMsg", errorMsg);
+                    command.Parameters.AddWithValue("@EmailReceiver", allRecipients);
+
+                    // Execute the stored procedure
+                    command.ExecuteNonQuery();
+                }
+            }
+        }   
     }
 
     public static string Encrypt(string plainText)
@@ -1395,8 +1539,6 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
     {
         try
         {
-
-
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
