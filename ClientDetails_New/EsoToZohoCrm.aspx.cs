@@ -54,6 +54,7 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
                                                                             { "Non ER Mileage", ("zoho_Non_ER_Mileage", "eso_MileageNE") },
                                                                             { "SCT", ("zoho_SCT", "eso_Sct") },
                                                                             { "Non Transport Charge", ("zoho_Non_Transport_Charge", "eso_Tnt") },
+                                                                            { "Last Rate Change", ("zoho_Last_Rate_Change", "eso_LastRateChange") },
                                                                             { "Insu Pay to Street", ("zoho_Insu_Pay_to_Street", "eso_InsPayToAddress") },
                                                                             { "Insu Pay to City", ("zoho_Insu_Pay_to_City", "eso_InsPayToCity") },
                                                                             { "Insu Pay to State", ("zoho_Insu_Pay_to_State", "eso_InsPayToState") },
@@ -211,9 +212,38 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
                         bccRecipients += string.IsNullOrEmpty(bccRecipients) ? emailResults.bccMails : ";" + emailResults.bccMails;
                     }
 
-                    SendEmailApproval(changedFields, comFields, accOwnerEmail, RequestType, isApprovalEmail, toRecipients, ccRecipients, bccRecipients);
-                    Response.StatusCode = 200;
-                    Response.Write($"Success: Email Sent Successfully");
+                    // Extract all address - related fields dynamically from addressFieldsMapping
+                    var addressFields = addressFieldsMapping
+                        .SelectMany(mapping => mapping.Value)  // Flatten the list of address key pairs
+                        .Where(pair => changedFields.ContainsKey(pair.zohoKey) || changedFields.ContainsKey(pair.esoKey))  // Only include those in changedFields
+                        .Select(pair => pair.zohoKey)          // Get the Zoho keys for address fields
+                        .Concat(addressFieldsMapping
+                            .SelectMany(mapping => mapping.Value)
+                            .Where(pair => changedFields.ContainsKey(pair.zohoKey) || changedFields.ContainsKey(pair.esoKey))  // Only include those in changedFields
+                            .Select(pair => pair.esoKey))      // Get the ESO keys for address fields
+                        .ToList();                            // Collect them into a list
+
+
+                    // Separate active non-address fields
+                    var activeFields = fieldMappings
+                        .Where(kvp =>
+                            // Filter out address fields and check if they are in changedFields
+                            !addressFields.Contains(kvp.Value.ZohoKey) &&
+                            !addressFields.Contains(kvp.Value.CcmsKey) &&
+                            (changedFields.ContainsKey(kvp.Value.ZohoKey) || changedFields.ContainsKey(kvp.Value.CcmsKey)))
+                        .ToList();
+
+                    if (activeFields.Count > 0 || addressFields.Count > 0)
+                    {
+                        SendEmailApproval(changedFields, comFields, accOwnerEmail, RequestType, isApprovalEmail, toRecipients, ccRecipients, bccRecipients);
+                        Response.StatusCode = 200;
+                        Response.Write($"Success: Email Sent Successfully");
+                    }
+                    else
+                    {
+                        Response.StatusCode = 200;
+                        Response.Write($"Error: No Changes in records. Email not required");
+                    }
 
                 }
             }
@@ -879,14 +909,17 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
         string zohoResultTable = "";
         bool hasAnyAddressChange = false;
 
-        // Extract all address-related fields dynamically from addressFieldsMapping
+        // Extract all address - related fields dynamically from addressFieldsMapping
         var addressFields = addressFieldsMapping
             .SelectMany(mapping => mapping.Value)  // Flatten the list of address key pairs
+            .Where(pair => changedFields.ContainsKey(pair.zohoKey) || changedFields.ContainsKey(pair.esoKey))  // Only include those in changedFields
             .Select(pair => pair.zohoKey)          // Get the Zoho keys for address fields
             .Concat(addressFieldsMapping
                 .SelectMany(mapping => mapping.Value)
+                .Where(pair => changedFields.ContainsKey(pair.zohoKey) || changedFields.ContainsKey(pair.esoKey))  // Only include those in changedFields
                 .Select(pair => pair.esoKey))      // Get the ESO keys for address fields
             .ToList();                            // Collect them into a list
+
 
         // Separate active non-address fields
         var activeFields = fieldMappings

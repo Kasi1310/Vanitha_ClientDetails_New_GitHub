@@ -194,8 +194,8 @@ public partial class CcmsToZohoCrm : System.Web.UI.Page
                                     {
                                         data = new[]
                                         {
-                                changedFields
-                            }
+                                            changedFields
+                                        }
                                     };
 
                                     CompulsoryFields comFields = new CompulsoryFields();
