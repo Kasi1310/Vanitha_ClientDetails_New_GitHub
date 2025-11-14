@@ -101,6 +101,8 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
         }
     };
 
+    public static string RunEnvironment = ConfigurationManager.AppSettings["RunEnvironment"].ToString().ToUpper();
+
     protected void Page_Load(object sender, EventArgs e)
     {
         sServer = ConfigurationManager.AppSettings["SmtpServer"];
@@ -191,27 +193,36 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
                         .Properties()
                         .Where(p => !excludedKeys.Contains(p.Name))
                         .ToDictionary(p => p.Name, p => p.Value?.ToString());
-       
-                    var emailResults = GetEmailApprovers(connectionString, Category, isApprovalEmail);
 
-                    // Add To emails
-                    if (!string.IsNullOrEmpty(emailResults.toMails))
+                    if (RunEnvironment == "LIVE")
                     {
-                        toRecipients += string.IsNullOrEmpty(toRecipients) ? emailResults.toMails : ";" + emailResults.toMails;
-                    }
+                        var emailResults = GetEmailApprovers(connectionString, Category, isApprovalEmail);
 
-                    // Add CC emails (including the pre-existing value from payload)
-                    if (!string.IsNullOrEmpty(emailResults.ccMails))
+                        // Add To emails
+                        if (!string.IsNullOrEmpty(emailResults.toMails))
+                        {
+                            toRecipients += string.IsNullOrEmpty(toRecipients) ? emailResults.toMails : ";" + emailResults.toMails;
+                        }
+
+                        // Add CC emails (including the pre-existing value from payload)
+                        if (!string.IsNullOrEmpty(emailResults.ccMails))
+                        {
+                            ccRecipients += string.IsNullOrEmpty(ccRecipients) ? emailResults.ccMails : ";" + emailResults.ccMails;
+                        }
+
+                        // Add BCC emails
+                        if (!string.IsNullOrEmpty(emailResults.bccMails))
+                        {
+                            bccRecipients += string.IsNullOrEmpty(bccRecipients) ? emailResults.bccMails : ";" + emailResults.bccMails;
+                        }
+                    }
+                    else // TEST
                     {
-                        ccRecipients += string.IsNullOrEmpty(ccRecipients) ? emailResults.ccMails : ";" + emailResults.ccMails;
+                        toRecipients = ConfigurationManager.AppSettings["EsoToZohoCrmToEmail"].ToString();
+                        ccRecipients = "";
+                        bccRecipients = "";
                     }
-
-                    // Add BCC emails
-                    if (!string.IsNullOrEmpty(emailResults.bccMails))
-                    {
-                        bccRecipients += string.IsNullOrEmpty(bccRecipients) ? emailResults.bccMails : ";" + emailResults.bccMails;
-                    }
-
+                        
                     // Extract all address - related fields dynamically from addressFieldsMapping
                     var addressFields = addressFieldsMapping
                         .SelectMany(mapping => mapping.Value)  // Flatten the list of address key pairs
@@ -388,26 +399,35 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
                             string toRecipients = "";
                             string ccRecipients = "";
                             string bccRecipients = "";
-                            ccRecipients = accOwnerEmail;
 
-                            var emailResults = GetEmailApprovers(connectionString, Category, isApprovalEmail);
-
-                            // Add To emails
-                            if (!string.IsNullOrEmpty(emailResults.toMails))
+                            if (RunEnvironment == "LIVE")
                             {
-                                toRecipients += string.IsNullOrEmpty(toRecipients) ? emailResults.toMails : ";" + emailResults.toMails;
+                                ccRecipients = accOwnerEmail;
+                                var emailResults = GetEmailApprovers(connectionString, Category, isApprovalEmail);
+
+                                // Add To emails
+                                if (!string.IsNullOrEmpty(emailResults.toMails))
+                                {
+                                    toRecipients += string.IsNullOrEmpty(toRecipients) ? emailResults.toMails : ";" + emailResults.toMails;
+                                }
+
+                                // Add CC emails (including the pre-existing value from payload)
+                                if (!string.IsNullOrEmpty(emailResults.ccMails))
+                                {
+                                    ccRecipients += string.IsNullOrEmpty(ccRecipients) ? emailResults.ccMails : ";" + emailResults.ccMails;
+                                }
+
+                                // Add BCC emails
+                                if (!string.IsNullOrEmpty(emailResults.bccMails))
+                                {
+                                    bccRecipients += string.IsNullOrEmpty(bccRecipients) ? emailResults.bccMails : ";" + emailResults.bccMails;
+                                }
                             }
-
-                            // Add CC emails (including the pre-existing value from payload)
-                            if (!string.IsNullOrEmpty(emailResults.ccMails))
+                            else // TEST
                             {
-                                ccRecipients += string.IsNullOrEmpty(ccRecipients) ? emailResults.ccMails : ";" + emailResults.ccMails;
-                            }
-
-                            // Add BCC emails
-                            if (!string.IsNullOrEmpty(emailResults.bccMails))
-                            {
-                                bccRecipients += string.IsNullOrEmpty(bccRecipients) ? emailResults.bccMails : ";" + emailResults.bccMails;
+                                toRecipients = ConfigurationManager.AppSettings["EsoToZohoCrmToEmail"].ToString();
+                                ccRecipients = "";
+                                bccRecipients = "";
                             }
 
                             if (decision == "approve")

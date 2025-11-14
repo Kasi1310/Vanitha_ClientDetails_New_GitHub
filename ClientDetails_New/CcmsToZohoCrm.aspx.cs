@@ -45,8 +45,21 @@ public partial class CcmsToZohoCrm : System.Web.UI.Page
                                                                             { "Year 2 Fee", ("zoho_Year_2_Fee1", "ccms_Year2") },
                                                                             { "Year 3 Fee", ("zoho_Year_3_Fee1", "ccms_Year3") },
                                                                             { "Year 4 Fee", ("zoho_Year_4_Fee1", "ccms_Year4") },
+                                                                            { "Contract Start Date", ("zoho_Client_Start_Date", "ccms_ContractSignedDate") },
+                                                                            { "Contract Effective Date", ("zoho_Contract_Renewed", "ccms_ContractEffDate") },
+                                                                            { "Contract Expiry Date", ("zoho_Contract_Expires", "ccms_ContractExpiryDate") },
                                                                             // Add any new mappings here
                                                                         };
+
+    public static readonly List<string> DateFormatKeys = new List<string>
+                                                            {
+                                                                //Key Present in the JSON data of Post Method and also an ccms_key
+                                                                "ContractSignedDate",
+                                                                "ContractEffDate",
+                                                                "ContractExpiryDate"
+                                                            };
+
+    public static string RunEnvironment = ConfigurationManager.AppSettings["RunEnvironment"].ToString().ToUpper();
 
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -107,6 +120,7 @@ public partial class CcmsToZohoCrm : System.Web.UI.Page
                 }
 
                 JObject payload = JObject.Parse(jsonPayload);
+                UpdateDateFields(payload);
 
                 string ZohoId = payload["ZohoCrmId"]?.ToString();
                 string CompanyId = payload["CompanyId"]?.ToString();
@@ -206,23 +220,32 @@ public partial class CcmsToZohoCrm : System.Web.UI.Page
                                     comFields.RequestedBy = payload["RequestedBy"]?.ToString();
                                     RequestType = "UPDATE";
 
-                                    var emailResults = GetEmailApprovers(connectionString, isApprovalEmail);
-                                    // Add To emails
-                                    if (!string.IsNullOrEmpty(emailResults.toMails))
+                                    if (RunEnvironment == "LIVE")
                                     {
-                                        toRecipients += string.IsNullOrEmpty(toRecipients) ? emailResults.toMails : ";" + emailResults.toMails;
-                                    }
+                                        var emailResults = GetEmailApprovers(connectionString, isApprovalEmail);
+                                        // Add To emails
+                                        if (!string.IsNullOrEmpty(emailResults.toMails))
+                                        {
+                                            toRecipients += string.IsNullOrEmpty(toRecipients) ? emailResults.toMails : ";" + emailResults.toMails;
+                                        }
 
-                                    // Add CC emails (including the pre-existing value from payload)
-                                    if (!string.IsNullOrEmpty(emailResults.ccMails))
-                                    {
-                                        ccRecipients += string.IsNullOrEmpty(ccRecipients) ? emailResults.ccMails : ";" + emailResults.ccMails;
-                                    }
+                                        // Add CC emails (including the pre-existing value from payload)
+                                        if (!string.IsNullOrEmpty(emailResults.ccMails))
+                                        {
+                                            ccRecipients += string.IsNullOrEmpty(ccRecipients) ? emailResults.ccMails : ";" + emailResults.ccMails;
+                                        }
 
-                                    // Add BCC emails
-                                    if (!string.IsNullOrEmpty(emailResults.bccMails))
+                                        // Add BCC emails
+                                        if (!string.IsNullOrEmpty(emailResults.bccMails))
+                                        {
+                                            bccRecipients += string.IsNullOrEmpty(bccRecipients) ? emailResults.bccMails : ";" + emailResults.bccMails;
+                                        }
+                                    }
+                                    else // TEST
                                     {
-                                        bccRecipients += string.IsNullOrEmpty(bccRecipients) ? emailResults.bccMails : ";" + emailResults.bccMails;
+                                        toRecipients = ConfigurationManager.AppSettings["CcmsToZohoCrmToEmail"].ToString();
+                                        ccRecipients = "";
+                                        bccRecipients = "";
                                     }
 
                                     SendEmailApproval(changedFields, comFields, accOwnerEmail, RequestType, isApprovalEmail, toRecipients, ccRecipients, bccRecipients);
@@ -291,25 +314,34 @@ public partial class CcmsToZohoCrm : System.Web.UI.Page
                             comFields.RequestedBy = payload["RequestedBy"]?.ToString();
                             RequestType = "NEW";
 
-                            var emailResults = GetEmailApprovers(connectionString, isApprovalEmail);
-                            // Add To emails
-                            if (!string.IsNullOrEmpty(emailResults.toMails))
+                            if (RunEnvironment == "LIVE")
                             {
-                                toRecipients += string.IsNullOrEmpty(toRecipients) ? emailResults.toMails : ";" + emailResults.toMails;
-                            }
+                                var emailResults = GetEmailApprovers(connectionString, isApprovalEmail);
+                                // Add To emails
+                                if (!string.IsNullOrEmpty(emailResults.toMails))
+                                {
+                                    toRecipients += string.IsNullOrEmpty(toRecipients) ? emailResults.toMails : ";" + emailResults.toMails;
+                                }
 
-                            // Add CC emails (including the pre-existing value from payload)
-                            if (!string.IsNullOrEmpty(emailResults.ccMails))
+                                // Add CC emails (including the pre-existing value from payload)
+                                if (!string.IsNullOrEmpty(emailResults.ccMails))
+                                {
+                                    ccRecipients += string.IsNullOrEmpty(ccRecipients) ? emailResults.ccMails : ";" + emailResults.ccMails;
+                                }
+
+                                // Add BCC emails
+                                if (!string.IsNullOrEmpty(emailResults.bccMails))
+                                {
+                                    bccRecipients += string.IsNullOrEmpty(bccRecipients) ? emailResults.bccMails : ";" + emailResults.bccMails;
+                                }
+                            }
+                            else // TEST
                             {
-                                ccRecipients += string.IsNullOrEmpty(ccRecipients) ? emailResults.ccMails : ";" + emailResults.ccMails;
+                                toRecipients = ConfigurationManager.AppSettings["CcmsToZohoCrmToEmail"].ToString();
+                                ccRecipients = "";
+                                bccRecipients = "";
                             }
-
-                            // Add BCC emails
-                            if (!string.IsNullOrEmpty(emailResults.bccMails))
-                            {
-                                bccRecipients += string.IsNullOrEmpty(bccRecipients) ? emailResults.bccMails : ";" + emailResults.bccMails;
-                            }
-
+                            
                             SendEmailApproval(changedFields, comFields, accOwnerEmail, RequestType, isApprovalEmail, toRecipients, ccRecipients, bccRecipients);
 
                             Response.StatusCode = 200;
@@ -471,24 +503,34 @@ public partial class CcmsToZohoCrm : System.Web.UI.Page
                             string toRecipients = "";
                             string ccRecipients = "";
                             string bccRecipients = "";
-                            ccRecipients = accOwnerEmail;
 
-                            var emailResults = GetEmailApprovers(connectionString, isApprovalEmail);
-                            if (!string.IsNullOrEmpty(emailResults.toMails))
+                            if (RunEnvironment == "LIVE")
                             {
-                                toRecipients += string.IsNullOrEmpty(toRecipients) ? emailResults.toMails : ";" + emailResults.toMails;
-                            }
+                                ccRecipients = accOwnerEmail;
+                                var emailResults = GetEmailApprovers(connectionString, isApprovalEmail);
+                                
+                                if (!string.IsNullOrEmpty(emailResults.toMails))
+                                {
+                                    toRecipients += string.IsNullOrEmpty(toRecipients) ? emailResults.toMails : ";" + emailResults.toMails;
+                                }
 
-                            if (!string.IsNullOrEmpty(emailResults.ccMails))
+                                if (!string.IsNullOrEmpty(emailResults.ccMails))
+                                {
+                                    ccRecipients += string.IsNullOrEmpty(ccRecipients) ? emailResults.ccMails : ";" + emailResults.ccMails;
+                                }
+
+                                if (!string.IsNullOrEmpty(emailResults.bccMails))
+                                {
+                                    bccRecipients += string.IsNullOrEmpty(bccRecipients) ? emailResults.bccMails : ";" + emailResults.bccMails;
+                                }
+                            }
+                            else // TEST
                             {
-                                ccRecipients += string.IsNullOrEmpty(ccRecipients) ? emailResults.ccMails : ";" + emailResults.ccMails;
+                                toRecipients = ConfigurationManager.AppSettings["CcmsToZohoCrmToEmail"].ToString();
+                                ccRecipients = "";
+                                bccRecipients = "";
                             }
-
-                            if (!string.IsNullOrEmpty(emailResults.bccMails))
-                            {
-                                bccRecipients += string.IsNullOrEmpty(bccRecipients) ? emailResults.bccMails : ";" + emailResults.bccMails;
-                            }
-
+                            
 
                             if (decision == "approve")
                             {
@@ -986,15 +1028,32 @@ public partial class CcmsToZohoCrm : System.Web.UI.Page
         // Old values (Zoho)
         foreach (var field in activeFields)
         {
-            string value = changedFields.ContainsKey(field.Value.ZohoKey) ? changedFields[field.Value.ZohoKey] : "";
-            changesTable.Append($@"<td>{value}</td>");
+            if (DateFormatKeys.Contains(field.Value.CcmsKey.Replace("ccms_", string.Empty))) // Check the ccms key is a date format key
+            {
+                string value = changedFields.ContainsKey(field.Value.ZohoKey) ? changedFields[field.Value.ZohoKey] : "";
+                changesTable.Append($@"<td>{ConvertToReadableFormatDate(value)}</td>");
+            }
+            else
+            {
+                string value = changedFields.ContainsKey(field.Value.ZohoKey) ? changedFields[field.Value.ZohoKey] : "";
+                changesTable.Append($@"<td>{value}</td>");
+            }
+            
         }
 
         // New values (CCMS)
         foreach (var field in activeFields)
         {
-            string value = changedFields.ContainsKey(field.Value.CcmsKey) ? changedFields[field.Value.CcmsKey] : "";
-            changesTable.Append($@"<td style=""color:red;font-weight:bold;"">{value}</td>");
+            if (DateFormatKeys.Contains(field.Value.CcmsKey.Replace("ccms_", string.Empty))) // Check the ccms key is a date format key
+            {
+                string value = changedFields.ContainsKey(field.Value.CcmsKey) ? changedFields[field.Value.CcmsKey] : "";
+                changesTable.Append($@"<td style=""color:red;font-weight:bold;"">{ConvertToReadableFormatDate(value)}</td>");
+            }
+            else
+            {
+                string value = changedFields.ContainsKey(field.Value.CcmsKey) ? changedFields[field.Value.CcmsKey] : "";
+                changesTable.Append($@"<td style=""color:red;font-weight:bold;"">{value}</td>");
+            }
         }
 
         changesTable.Append("</tr></table>");
@@ -1443,6 +1502,56 @@ public partial class CcmsToZohoCrm : System.Web.UI.Page
             Console.WriteLine("Error");
         }
     }
+
+    public static string ConvertToReadableFormatDate(string inputDate)
+    {
+        if (string.IsNullOrEmpty(inputDate))
+            return inputDate; // Return as-is if null or empty
+
+        if (DateTime.TryParseExact(inputDate, "yyyy-MM-dd",
+                                   CultureInfo.InvariantCulture,
+                                   DateTimeStyles.None,
+                                   out DateTime parsedDate))
+        {
+            return parsedDate.ToString("MMM dd, yyyy"); // e.g., "Nov 06, 2025"
+        }
+
+        // Return original if parsing fails
+        return inputDate;
+    }
+
+    private static void UpdateDateFields(JObject payload)
+    {
+        var allDateKeys = new List<string>(DateFormatKeys);
+        allDateKeys.AddRange(DateFormatKeys.Select(key => "Old_" + key));  // Add "Old_" before each key
+
+        foreach (var key in allDateKeys)
+        {
+            if (payload.ContainsKey(key))
+            {
+                string dateString = payload[key].ToString();
+
+                if (!string.IsNullOrEmpty(dateString))
+                {
+                    DateTime parsedDate;
+                    bool isValidDate = DateTime.TryParseExact(dateString, "MM/dd/yyyy",
+                                                              CultureInfo.InvariantCulture,
+                                                              DateTimeStyles.None, out parsedDate);
+
+                    if (isValidDate)
+                    {
+                        string newDateFormat = parsedDate.ToString("yyyy-MM-dd");
+                        payload[key] = newDateFormat;  // Update the value in the payload
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Invalid date format for {key}: {dateString}");
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 public class ZohoApiCredentials
