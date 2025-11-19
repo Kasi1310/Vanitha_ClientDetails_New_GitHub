@@ -54,6 +54,8 @@ public partial class EsoToZohoCrm : System.Web.UI.Page
                                                                             { "Non ER Mileage", ("zoho_Non_ER_Mileage", "eso_MileageNE") },
                                                                             { "SCT", ("zoho_SCT", "eso_Sct") },
                                                                             { "Non Transport Charge", ("zoho_Non_Transport_Charge", "eso_Tnt") },
+                                                                            { "Non Transport Refusal", ("zoho_Non_Transport_Refusal", "eso_Refusal") },
+                                                                            { "Non Transport Lift Assist", ("zoho_Non_Transport_Lift_Assist", "eso_LiftAssist") },
                                                                             { "Last Rate Change", ("zoho_Last_Rate_Change", "eso_LastRateChange") },
                                                                             { "Insu Pay to Street", ("zoho_Insu_Pay_to_Street", "eso_InsPayToAddress") },
                                                                             { "Insu Pay to City", ("zoho_Insu_Pay_to_City", "eso_InsPayToCity") },
