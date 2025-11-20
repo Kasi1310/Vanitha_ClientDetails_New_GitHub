@@ -89,27 +89,37 @@ public partial class CcmsToZohoCrm : System.Web.UI.Page
 
 
                 ZohoApiCredentials ZohoCred = new ZohoApiCredentials();
-
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                if (RunEnvironment == "LIVE")
                 {
-                    connection.Open();
-
-                    using (SqlCommand cmd = new SqlCommand("[dbo].[GetZohoApiCredentials]", connection))
+                    using (SqlConnection connection = new SqlConnection(connectionString))
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        // cmd.Parameters.AddWithValue("@ZohoCrmId", data.ContactId); // Uncomment if needed
+                        connection.Open();
 
-                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        using (SqlCommand cmd = new SqlCommand("[dbo].[GetZohoApiCredentials]", connection))
                         {
-                            if (reader.Read())
+                            cmd.CommandType = CommandType.StoredProcedure;
+                            // cmd.Parameters.AddWithValue("@ZohoCrmId", data.ContactId); // Uncomment if needed
+
+                            using (SqlDataReader reader = cmd.ExecuteReader())
                             {
-                                ZohoCred.ClientId = reader["ClientId"]?.ToString();
-                                ZohoCred.ClientSecret = reader["ClientSecret"]?.ToString();
-                                ZohoCred.RefreshToken = reader["RefreshToken"]?.ToString();
+                                if (reader.Read())
+                                {
+                                    ZohoCred.ClientId = reader["ClientId"]?.ToString();
+                                    ZohoCred.ClientSecret = reader["ClientSecret"]?.ToString();
+                                    ZohoCred.RefreshToken = reader["RefreshToken"]?.ToString();
+                                }
                             }
                         }
                     }
                 }
+                else // TEST
+                {
+                    ZohoCred.ClientId = ConfigurationManager.AppSettings["SandboxZohoClientId"].ToString();
+                    ZohoCred.ClientSecret = ConfigurationManager.AppSettings["SandboxZohoClientSecret"].ToString();
+                    ZohoCred.RefreshToken = ConfigurationManager.AppSettings["SandboxZohoRefreshToken"].ToString();
+                }
+
+                    
 
                 bool isApprovalEmail = true;
                 // Read JSON payload
@@ -535,29 +545,36 @@ public partial class CcmsToZohoCrm : System.Web.UI.Page
                             if (decision == "approve")
                             {
                                 ZohoApiCredentials ZohoCred = new ZohoApiCredentials();
-
-                                using (SqlConnection connection = new SqlConnection(connectionString))
+                                if (RunEnvironment == "LIVE")
                                 {
-                                    connection.Open();
-
-                                    using (SqlCommand cmd = new SqlCommand("[dbo].[GetZohoApiCredentials]", connection))
+                                    using (SqlConnection connection = new SqlConnection(connectionString))
                                     {
-                                        cmd.CommandType = CommandType.StoredProcedure;
-                                        // cmd.Parameters.AddWithValue("@ZohoCrmId", data.ContactId); // Uncomment if needed
+                                        connection.Open();
 
-                                        using (SqlDataReader reader = cmd.ExecuteReader())
+                                        using (SqlCommand cmd = new SqlCommand("[dbo].[GetZohoApiCredentials]", connection))
                                         {
-                                            if (reader.Read())
+                                            cmd.CommandType = CommandType.StoredProcedure;
+                                            // cmd.Parameters.AddWithValue("@ZohoCrmId", data.ContactId); // Uncomment if needed
+
+                                            using (SqlDataReader reader = cmd.ExecuteReader())
                                             {
-                                                ZohoCred.ClientId = reader["ClientId"]?.ToString();
-                                                ZohoCred.ClientSecret = reader["ClientSecret"]?.ToString();
-                                                ZohoCred.RefreshToken = reader["RefreshToken"]?.ToString();
+                                                if (reader.Read())
+                                                {
+                                                    ZohoCred.ClientId = reader["ClientId"]?.ToString();
+                                                    ZohoCred.ClientSecret = reader["ClientSecret"]?.ToString();
+                                                    ZohoCred.RefreshToken = reader["RefreshToken"]?.ToString();
+                                                }
                                             }
                                         }
                                     }
                                 }
-
-
+                                else // TEST
+                                {
+                                    ZohoCred.ClientId = ConfigurationManager.AppSettings["SandboxZohoClientId"].ToString();
+                                    ZohoCred.ClientSecret = ConfigurationManager.AppSettings["SandboxZohoClientSecret"].ToString();
+                                    ZohoCred.RefreshToken = ConfigurationManager.AppSettings["SandboxZohoRefreshToken"].ToString();
+                                }
+                                    
                                 // Get valid access token
                                 string accessToken = GetAccessTokenFromRefreshToken(ZohoCred);
 
