@@ -72,7 +72,7 @@ public partial class ZohoCrmWebhookReceiver : System.Web.UI.Page
                 string toRecipients = "";
                 string ccRecipients = "";
                 string bccRecipients = "";
-                string accOwnerEmail = "";
+                string accOwnerEmail = webhookData.AccountOwnerEmail != null ? webhookData.AccountOwnerEmail : "";
                 string Category = "DEFAULT";
 
                 if (RunEnvironment == "LIVE")
@@ -1679,6 +1679,7 @@ public class ZohoCrmWebhookData
     public string ModifiedBy { get; set; }
     public string AccountName { get; set; }
     public string AccountId { get; set; }
+    public string AccountOwnerEmail { get; set; }
     public string ContactId { get; set; }
     public AddressInfo ContactsMailingAddress { get; set; }
     public AddressInfo BillingAddress { get; set; }  
