@@ -360,14 +360,14 @@ public partial class ZohoCrmWebhookReceiver : System.Web.UI.Page
                                         swalIcon = "success";
                                         swalTitle = "✅ Approved!";
                                         headerColor = "#2E8B57"; // green
-                                        headerText = "Your changes were successfully applied to the CCMS and PED application.";
+                                        headerText = "Your changes were successfully applied to the PED & CMS application.";
                                     }
                                     else if (ZohoStatus == "FAILED")
                                     {
                                         swalIcon = "error";
                                         swalTitle = "❗Failed";
                                         headerColor = "#d9534f"; // red
-                                        headerText = "Failed to apply your changes to the CCMS and PED application.";
+                                        headerText = "Failed to apply your changes to the PED & CMS application.";
                                     }
                                     else
                                     {
