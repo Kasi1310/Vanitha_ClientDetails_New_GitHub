@@ -68,54 +68,63 @@ public partial class ZohoCrmWebhookReceiver : System.Web.UI.Page
 
                 // Step 2: Deserialize JSON to an object
                 var webhookData = JsonConvert.DeserializeObject<ZohoCrmWebhookData>(jsonPayload);
-
-                string toRecipients = "";
-                string ccRecipients = "";
-                string bccRecipients = "";
-                string accOwnerEmail = webhookData.AccountOwnerEmail != null ? webhookData.AccountOwnerEmail : "";
-                string Category = "DEFAULT";
-
-                if (RunEnvironment == "LIVE")
+                if (string.IsNullOrEmpty(jsonPayload) || webhookData == null || IsObjectEmpty(webhookData))
                 {
-                    var emailResults = GetEmailApprovers(emailConnectionString, Category, isApprovalEmail);
-
-                    // Add To emails
-                    if (!string.IsNullOrEmpty(emailResults.toMails))
-                    {
-                        toRecipients += string.IsNullOrEmpty(toRecipients) ? emailResults.toMails : ";" + emailResults.toMails;
-                    }
-
-                    // Add CC emails (including the pre-existing value from payload)
-                    if (!string.IsNullOrEmpty(emailResults.ccMails))
-                    {
-                        ccRecipients += string.IsNullOrEmpty(ccRecipients) ? emailResults.ccMails : ";" + emailResults.ccMails;
-                    }
-
-                    // Add BCC emails
-                    if (!string.IsNullOrEmpty(emailResults.bccMails))
-                    {
-                        bccRecipients += string.IsNullOrEmpty(bccRecipients) ? emailResults.bccMails : ";" + emailResults.bccMails;
-                    }
+                    Response.StatusCode = 200;
+                    Response.StatusDescription = "Payload is empty - Email not required";
+                    Response.Write("Error: Payload is empty.");
+                    return;
                 }
-                else // TEST
+                else
                 {
-                    toRecipients = ConfigurationManager.AppSettings["ZohoCrmWebhookToEmail"].ToString();
-                    ccRecipients = "";
-                    bccRecipients = "";
-                }
+                    string toRecipients = "";
+                    string ccRecipients = "";
+                    string bccRecipients = "";
+                    string accOwnerEmail = webhookData.AccountOwnerEmail != null ? webhookData.AccountOwnerEmail : "";
+                    string Category = "DEFAULT";
 
-                // Step3: Email Approval
-                SendEmailApproval(jsonPayload, webhookData, accOwnerEmail, isApprovalEmail, toRecipients, ccRecipients, bccRecipients);
+                    if (RunEnvironment == "LIVE")
+                    {
+                        var emailResults = GetEmailApprovers(emailConnectionString, Category, isApprovalEmail);
+
+                        // Add To emails
+                        if (!string.IsNullOrEmpty(emailResults.toMails))
+                        {
+                            toRecipients += string.IsNullOrEmpty(toRecipients) ? emailResults.toMails : ";" + emailResults.toMails;
+                        }
+
+                        // Add CC emails (including the pre-existing value from payload)
+                        if (!string.IsNullOrEmpty(emailResults.ccMails))
+                        {
+                            ccRecipients += string.IsNullOrEmpty(ccRecipients) ? emailResults.ccMails : ";" + emailResults.ccMails;
+                        }
+
+                        // Add BCC emails
+                        if (!string.IsNullOrEmpty(emailResults.bccMails))
+                        {
+                            bccRecipients += string.IsNullOrEmpty(bccRecipients) ? emailResults.bccMails : ";" + emailResults.bccMails;
+                        }
+                    }
+                    else // TEST
+                    {
+                        toRecipients = ConfigurationManager.AppSettings["ZohoCrmWebhookToEmail"].ToString();
+                        ccRecipients = "";
+                        bccRecipients = "";
+                    }
+
+                    // Step3: Email Approval
+                    SendEmailApproval(jsonPayload, webhookData, accOwnerEmail, isApprovalEmail, toRecipients, ccRecipients, bccRecipients);
 
 
-                // Step 4: Respond to the webhook sender
-                Response.ContentType = "application/json";
-                Response.StatusCode = 200; // OK
-                Response.Write(JsonConvert.SerializeObject(new
-                {
-                    Message = "Data received and stored successfully.",
-                    Data = webhookData
-                }));
+                    // Step 4: Respond to the webhook sender
+                    Response.ContentType = "application/json";
+                    Response.StatusCode = 200; // OK
+                    Response.Write(JsonConvert.SerializeObject(new
+                    {
+                        Message = "Data received and stored successfully.",
+                        Data = webhookData
+                    }));
+                }                
             }
             catch (Exception ex)
             {
@@ -671,6 +680,7 @@ public partial class ZohoCrmWebhookReceiver : System.Web.UI.Page
         string formattedDate = DateTime.Now.ToString("MM/dd/yyyy (hh:mm:ss tt)", CultureInfo.InvariantCulture);
 
         (string htmlBody, string subject, ZohoCrmWebhookData zohoData) = ("" ,"" ,new ZohoCrmWebhookData());
+        bool emptyEmail = true;
 
         // STEP 1: Send to each "To" recipient individually
         foreach (string toEmail in toMails)
@@ -681,23 +691,27 @@ public partial class ZohoCrmWebhookReceiver : System.Web.UI.Page
                 (htmlBody, subject, zohoData) = EmailContentGenerator(
                     data, type, module, webhookLink, token, toEmail, action, formattedDate, isToRecipient, isApprovalEmail, responderAction, zohoResult);
 
-                System.Net.Mail.MailMessage mail = new System.Net.Mail.MailMessage
+                if(htmlBody != "" && subject != "")
                 {
-                    From = new MailAddress(smtpEmail),
-                    Subject = subject,
-                    Body = htmlBody,
-                    IsBodyHtml = true
-                };
-                mail.To.Add(toEmail);
+                    emptyEmail = false;
+                    System.Net.Mail.MailMessage mail = new System.Net.Mail.MailMessage
+                    {
+                        From = new MailAddress(smtpEmail),
+                        Subject = subject,
+                        Body = htmlBody,
+                        IsBodyHtml = true
+                    };
+                    mail.To.Add(toEmail);
 
-                using (SmtpClient smtp = new SmtpClient(smtpHost, smtpPort))
-                {
-                    smtp.Credentials = new NetworkCredential(smtpEmail, smtpPassword);
-                    smtp.EnableSsl = true;
-                    smtp.Send(mail);
+                    using (SmtpClient smtp = new SmtpClient(smtpHost, smtpPort))
+                    {
+                        smtp.Credentials = new NetworkCredential(smtpEmail, smtpPassword);
+                        smtp.EnableSsl = true;
+                        smtp.Send(mail);
+                    }
+
+                    successfulRecipients.Add(toEmail);
                 }
-
-                successfulRecipients.Add(toEmail);
             }
             catch (Exception ex)
             {
@@ -715,29 +729,33 @@ public partial class ZohoCrmWebhookReceiver : System.Web.UI.Page
                 (htmlBody, subject, zohoData) = EmailContentGenerator(
                     data, type, module, webhookLink, token, "null", action, formattedDate, isToRecipient, isApprovalEmail, responderAction, zohoResult);
 
-                System.Net.Mail.MailMessage mail = new System.Net.Mail.MailMessage
+                if (htmlBody != "" && subject != "")
                 {
-                    From = new MailAddress(smtpEmail),
-                    Subject = subject,
-                    Body = htmlBody,
-                    IsBodyHtml = true
-                };
+                    emptyEmail = false;
+                    System.Net.Mail.MailMessage mail = new System.Net.Mail.MailMessage
+                    {
+                        From = new MailAddress(smtpEmail),
+                        Subject = subject,
+                        Body = htmlBody,
+                        IsBodyHtml = true
+                    };
 
-                foreach (var cc in ccMails)
-                    mail.CC.Add(cc);
+                    foreach (var cc in ccMails)
+                        mail.CC.Add(cc);
 
-                foreach (var bcc in bccMails)
-                    mail.Bcc.Add(bcc);
+                    foreach (var bcc in bccMails)
+                        mail.Bcc.Add(bcc);
 
-                using (SmtpClient smtp = new SmtpClient(smtpHost, smtpPort))
-                {
-                    smtp.Credentials = new NetworkCredential(smtpEmail, smtpPassword);
-                    smtp.EnableSsl = true;
-                    smtp.Send(mail);
-                }
+                    using (SmtpClient smtp = new SmtpClient(smtpHost, smtpPort))
+                    {
+                        smtp.Credentials = new NetworkCredential(smtpEmail, smtpPassword);
+                        smtp.EnableSsl = true;
+                        smtp.Send(mail);
+                    }
 
-                successfulRecipients.AddRange(ccMails);
-                successfulRecipients.AddRange(bccMails);
+                    successfulRecipients.AddRange(ccMails);
+                    successfulRecipients.AddRange(bccMails);
+                } 
             }
             catch (Exception ex)
             {
@@ -758,8 +776,10 @@ public partial class ZohoCrmWebhookReceiver : System.Web.UI.Page
         string bccSection = "[BCC] " + string.Join(",", bccMails);
         string allRecipients = $"{toSection} |{ccSection} |{bccSection}";
 
-        SaveToEmailApprovalTable(JsonPayload, data, zohoData, accOwnerEmail, token, status, errorMsg, allRecipients, isApprovalEmail, recordId);
-
+        if (!emptyEmail)
+        {
+            SaveToEmailApprovalTable(JsonPayload, data, zohoData, accOwnerEmail, token, status, errorMsg, allRecipients, isApprovalEmail, recordId);
+        }
     }
 
 
@@ -1660,6 +1680,12 @@ public partial class ZohoCrmWebhookReceiver : System.Web.UI.Page
         {
             return "ERROR";
         }
+    }
+
+    private bool IsObjectEmpty(object obj)
+    {
+        var properties = obj.GetType().GetProperties();
+        return properties.All(p => p.GetValue(obj) == null || p.GetValue(obj).ToString() == string.Empty);
     }
 }
 
